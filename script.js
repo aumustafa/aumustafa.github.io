@@ -14,7 +14,7 @@ let mouseX = 0;
 let mouseY = 0;
 let drawSquare = false;
 let lastDrawTime = 0;
-const throttleDelay = 50; // ms
+const throttleDelay = 20; // ms
 
 document.addEventListener('mousemove', (e) => {
   mouseX = e.clientX;
@@ -29,11 +29,11 @@ document.addEventListener('mousemove', (e) => {
 
 function animate() {
   // Draw translucent black rectangle over entire canvas (fades out old squares)
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.05)'; // white with low alpha
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; // white with low alpha
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   if (drawSquare) {
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = 'DarkOrange';
     ctx.fillRect(mouseX - 5, mouseY - 5, 10, 10);
     drawSquare = false;
   }
