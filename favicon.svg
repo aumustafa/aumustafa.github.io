@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Four 32x32 pastel squares -->
+  <rect x="0"  y="0"  width="32" height="32" fill="hsl(30, 70%, 80%)" />
+  <rect x="32" y="0"  width="32" height="32" fill="hsl(120, 70%, 80%)" />
+  <rect x="0"  y="32" width="32" height="32" fill="hsl(210, 70%, 80%)" />
+  <rect x="32" y="32" width="32" height="32" fill="hsl(300, 70%, 80%)" />
+
+  <!-- Black 'A' centered -->
+  <text
+    x="32" y="40"
+    font-family="Times, serif"
+    font-size="60"
+    font-weight="bold"
+    fill="black"
+    text-anchor="middle"
+    dominant-baseline="middle"
+  >
+    A
+  </text>
+</svg>
