@@ -35,20 +35,42 @@ document.addEventListener('touchmove', (e) => {
   drawSquare = true;
 }, { passive: false });
 
+function drawHand(centerX, centerY, angle, length, color, width) {
+  ctx.save(); // Save current state
+  ctx.translate(centerX, centerY);
+  ctx.rotate(angle);
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, -length);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.restore(); // Restore to original state
+}
 
-// function animate() {
-//   // Draw translucent black rectangle over entire canvas (fades out old squares)
-//   ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; // white with low alpha
-//   ctx.fillRect(0, 0, canvas.width, canvas.height);
+function drawClock() {
+  const now = new Date();
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
 
-//   if (drawSquare) {
-//     ctx.fillStyle = 'DarkOrange';
-//     ctx.fillRect(mouseX - 5, mouseY - 5, 10, 10);
-//     drawSquare = false;
-//   }
+  const minDim = Math.min(canvas.width, canvas.height);
+  const hourLength = minDim * 0.3;
+  const minuteLength = minDim * 0.4;
+  const secondLength = minDim * 0.45;
 
-//   requestAnimationFrame(animate);
-// }
+  const second = now.getSeconds() + now.getMilliseconds() / 1000;
+  const minute = now.getMinutes() + second / 60;
+  const hour = now.getHours() % 12 + minute / 60;
+
+  const secondAngle = (Math.PI / 30) * second;
+  const minuteAngle = (Math.PI / 30) * minute;
+  const hourAngle = (Math.PI / 6) * hour;
+
+  drawHand(centerX, centerY, hourAngle, hourLength, '#000', 6);
+  drawHand(centerX, centerY, minuteAngle, minuteLength, '#555', 4);
+  drawHand(centerX, centerY, secondAngle, secondLength, `hsl(${hue}, 100%, 50%)`, 2);
+}
 
 const cellSize = 10;
 let lastCellX = -1;
@@ -56,7 +78,7 @@ let lastCellY = -1;
 let hue = 30; // start near 'DarkOrange'
 
 function animate() {
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const centerX = canvas.width / 2;
@@ -72,7 +94,7 @@ function animate() {
 
   // Ratio: 0 (center) to 1 (corner)
   const ratio = distance / maxDistance;
-  const easedRatio = Math.pow(ratio, 1.5)
+  const easedRatio = Math.pow(ratio, 2)
 
   // Map ratio to alpha: 0.1 (in center) to 0.8 (edges)
   const alpha = 0.05 + easedRatio * 0.95;
@@ -100,6 +122,7 @@ function animate() {
     drawSquare = false;
   }
 
+  drawClock();
   requestAnimationFrame(animate);
 }
 
