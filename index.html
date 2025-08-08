@@ -2,10 +2,11 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Abdullah's Website</title>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="favicon.png" type="image/png" sizes="64x64">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="favicon.png" type="image/png" sizes="64x64" />
+  <link href="https://fonts.googleapis.com/css2?family=Tienne&display=swap"   rel="stylesheet" />
   <style>
     html,
     body {
@@ -37,6 +38,22 @@
       text-align: center;
     }
 
+    /* Digital time at bottom */
+    #timeText {
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-family: 'Tienne', serif;
+      font-variant-numeric: tabular-nums;
+      font-size: 4vw;
+      color: rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      user-select: none;
+      z-index: 2;
+      transition: color 0.2s ease;
+    }
+
     /* Canvas on top of background */
     canvas {
       position: absolute;
@@ -62,9 +79,11 @@ o88o     o8888o  `Y8bod8P' `Y8bod88P"  `V88V"V8P' o888o o888o `Y888""8o o888o o8
     </code></pre>
   </div>
 
+  <!-- Digital Time Display -->
+  <div id="timeText">--:--:--</div>
+
   <canvas id="drawCanvas"></canvas>
   <script src="script.js"></script>
-
 </body>
 
 </html>

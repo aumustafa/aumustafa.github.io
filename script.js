@@ -1,11 +1,11 @@
-const canvas = document.getElementById('drawCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("drawCanvas");
+const ctx = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 // Resize canvas if window changes
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
@@ -16,7 +16,7 @@ let drawSquare = false;
 let lastDrawTime = 0;
 const throttleDelay = 20; // ms
 
-document.addEventListener('mousemove', (e) => {
+document.addEventListener("mousemove", (e) => {
   mouseX = e.clientX;
   mouseY = e.clientY;
 
@@ -27,13 +27,17 @@ document.addEventListener('mousemove', (e) => {
   }
 });
 
-document.addEventListener('touchmove', (e) => {
-  e.preventDefault(); // prevents scrolling
-  const touch = e.touches[0];
-  mouseX = touch.clientX;
-  mouseY = touch.clientY;
-  drawSquare = true;
-}, { passive: false });
+document.addEventListener(
+  "touchmove",
+  (e) => {
+    e.preventDefault(); // prevents scrolling
+    const touch = e.touches[0];
+    mouseX = touch.clientX;
+    mouseY = touch.clientY;
+    drawSquare = true;
+  },
+  { passive: false }
+);
 
 function drawHand(centerX, centerY, angle, length, color, width) {
   ctx.save(); // Save current state
@@ -44,7 +48,7 @@ function drawHand(centerX, centerY, angle, length, color, width) {
   ctx.lineTo(0, -length);
   ctx.strokeStyle = color;
   ctx.lineWidth = width;
-  ctx.lineCap = 'round';
+  ctx.lineCap = "round";
   ctx.stroke();
   ctx.restore(); // Restore to original state
 }
@@ -61,15 +65,22 @@ function drawClock() {
 
   const second = now.getSeconds() + now.getMilliseconds() / 1000;
   const minute = now.getMinutes() + second / 60;
-  const hour = now.getHours() % 12 + minute / 60;
+  const hour = (now.getHours() % 12) + minute / 60;
 
   const secondAngle = (Math.PI / 30) * second;
   const minuteAngle = (Math.PI / 30) * minute;
   const hourAngle = (Math.PI / 6) * hour;
 
-  drawHand(centerX, centerY, hourAngle, hourLength, '#000', 6);
-  drawHand(centerX, centerY, minuteAngle, minuteLength, '#555', 4);
-  drawHand(centerX, centerY, secondAngle, secondLength, `hsl(${hue}, 100%, 50%)`, 2);
+  drawHand(centerX, centerY, hourAngle, hourLength, "#000", 6);
+  drawHand(centerX, centerY, minuteAngle, minuteLength, "#555", 4);
+  drawHand(
+    centerX,
+    centerY,
+    secondAngle,
+    secondLength,
+    `hsl(${hue}, 100%, 50%)`,
+    2
+  );
 }
 
 const cellSize = 10;
@@ -77,8 +88,19 @@ let lastCellX = -1;
 let lastCellY = -1;
 let hue = 30; // start near 'DarkOrange'
 
+const asciiDiv = document.getElementById("ascii");
+const timeText = document.getElementById("timeText");
+
+function updateDigitalTime() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  timeText.textContent = `${hours}:${minutes}:${seconds}`;
+}
+
 function animate() {
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+  ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const centerX = canvas.width / 2;
@@ -94,27 +116,29 @@ function animate() {
 
   // Ratio: 0 (center) to 1 (corner)
   const ratio = distance / maxDistance;
-  const easedRatio = Math.pow(ratio, 2)
+  const easedRatio = Math.pow(ratio, 2);
 
-  // Map ratio to alpha: 0.1 (in center) to 0.8 (edges)
-  const alpha = 0.05 + easedRatio * 0.95;
+  // Map ratio to alpha: 0.05 (in center) to 0.8 (edges)
+  const alpha = 0.05 + easedRatio * 0.75;
 
-  // Update ASCII text color
-  const asciiDiv = document.getElementById('ascii');
+  // Update opacity for ASCII art only
   asciiDiv.style.color = `rgba(0, 0, 0, ${alpha.toFixed(2)})`;
+
+  // Keep digital time fully opaque black
+  timeText.style.color = "rgba(0, 0, 0, 1)";
+
+  // Update digital time text
+  updateDigitalTime();
 
   if (drawSquare) {
     const gridX = Math.floor(mouseX / cellSize) * cellSize;
     const gridY = Math.floor(mouseY / cellSize) * cellSize;
 
     if (gridX !== lastCellX || gridY !== lastCellY) {
-      // Use HSL color
       ctx.fillStyle = `hsl(${hue}, 100%, 60%)`;
       ctx.fillRect(gridX, gridY, cellSize, cellSize);
 
-      // Slowly rotate through the hue wheel
       hue = (hue + 1) % 360;
-
       lastCellX = gridX;
       lastCellY = gridY;
     }
@@ -125,6 +149,5 @@ function animate() {
   drawClock();
   requestAnimationFrame(animate);
 }
-
 
 animate();
