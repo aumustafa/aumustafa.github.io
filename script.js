@@ -53,6 +53,29 @@ function drawHand(centerX, centerY, angle, length, color, width) {
   ctx.restore(); // Restore to original state
 }
 
+function drawTickMarks(centerX, centerY, radius) {
+  const numTicks = 60;
+  for (let i = 0; i < numTicks; i++) {
+    const angle = (Math.PI * 2 * i) / numTicks;
+    const inner = radius - (i % 5 === 0 ? 18 : 8);
+    const outer = radius;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(
+      centerX + inner * Math.sin(angle),
+      centerY - inner * Math.cos(angle)
+    )
+  ctx.lineTo(
+      centerX + outer * Math.sin(angle),
+      centerY - outer * Math.cos(angle)
+    );
+  ctx.strokeStyle = i % 5 === 0 ? "#222" : "#aaa";
+  ctx.lineWidth = i % 5 === 0 ? 3 : 1;
+  ctx.stroke();
+  ctx.restore();
+  }
+}
+
 function drawClock() {
   const now = new Date();
   const centerX = canvas.width / 2;
@@ -62,8 +85,13 @@ function drawClock() {
   const hourLength = minDim * 0.3;
   const minuteLength = minDim * 0.4;
   const secondLength = minDim * 0.45;
+  const tickRadius = minDim * 0.48;
 
-  const second = now.getSeconds() + now.getMilliseconds() / 1000;
+  // Draw Tick Marks
+  drawTickMarks(centerX, centerY, tickRadius);
+
+  // const second = now.getSeconds() + now.getMilliseconds() / 1000; // Use this if you want the second hand to move continuously
+  const second = now.getSeconds(); // Use this for discrete second hand movement
   const minute = now.getMinutes() + second / 60;
   const hour = (now.getHours() % 12) + minute / 60;
 

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Abdullah's PDFs</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="../favicon.png" type="image/png" sizes="64x64" />
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    canvas {
+      display: block;
+      margin: 20px auto;
+      max-width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="pdf-canvas"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist/build/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdn.jsdelivr.net/npm/pdfjs-dist/build/pdf.worker.min.js';
+
+    pdfjsLib.getDocument('laserAtThreshold.pdf').promise.then(pdf => {
+      pdf.getPage(1).then(page => {
+        const scale = 1.5;
+        const viewport = page.getViewport({ scale });
+
+        const canvas = document.getElementById('pdf-canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        page.render({
+          canvasContext: canvas.getContext('2d'),
+          viewport
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
