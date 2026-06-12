@@ -7,38 +7,23 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="../favicon.png" type="image/png" sizes="64x64" />
   <link rel="stylesheet" href="../styles.css" />
-  <style>
-    canvas {
-      display: block;
-      margin: 20px auto;
-      max-width: 100%;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet" />
 </head>
 
 <body>
-  <canvas id="pdf-canvas"></canvas>
+  <a href="penguins_kde.pdf" target="_blank">View output</a>
 
-  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist/build/pdf.min.js"></script>
+  <pre id="code-block">Loading...</pre>
+
   <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdn.jsdelivr.net/npm/pdfjs-dist/build/pdf.worker.min.js';
-
-    pdfjsLib.getDocument('laserAtThreshold.pdf').promise.then(pdf => {
-      pdf.getPage(1).then(page => {
-        const scale = 1.5;
-        const viewport = page.getViewport({ scale });
-
-        const canvas = document.getElementById('pdf-canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-
-        page.render({
-          canvasContext: canvas.getContext('2d'),
-          viewport
-        });
+    fetch('plots-gallery/regresfigure.py')
+      .then(response => response.text())
+      .then(text => {
+        document.getElementById('code-block').textContent = text;
+      })
+      .catch(() => {
+        document.getElementById('code-block').textContent = 'Could not load file.';
       });
-    });
   </script>
 </body>
 
