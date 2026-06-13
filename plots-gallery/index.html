@@ -3,27 +3,48 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Abdullah's PDFs</title>
+  <title>Demo of pub_style</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="../favicon.png" type="image/png" sizes="64x64" />
   <link rel="stylesheet" href="../styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet" />
+  <!-- add these two lines to your existing head -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/color-brewer.min.css"> -->
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet">
 </head>
 
 <body>
-  <a href="penguins_kde.pdf" target="_blank">View output</a>
-
-  <pre id="code-block">Loading...</pre>
+  <h1>Showcase of <code>pub_style</code></h1>
+  <p>This is a demo of <code>pub_style</code> package. I have the plots and then the codes below. Note that using <code>fig.savefig('figure')</code>, that saves as <code>figure.pdf</code>. To save an SVG, for example, do <code>fig.savefig('figure.svg')</code>. Also click on the link of the headers to view the PDF output.</p>
 
   <script>
-    fetch('plots-gallery/regresfigure.py')
-      .then(response => response.text())
-      .then(text => {
-        document.getElementById('code-block').textContent = text;
-      })
-      .catch(() => {
-        document.getElementById('code-block').textContent = 'Could not load file.';
-      });
+    function addPlot(title, pdfFile, svgFile, pyFile) {
+      const section = document.createElement('div');
+      section.innerHTML = `
+        <h3><a href="${pdfFile}" target="_blank">${title}</a></h3>
+        <img src="${svgFile}" alt="plot" style="width: 50%; height: auto;" />
+        <pre><code class="language-python">Loading...</code></pre>
+      `;
+      document.body.appendChild(section);
+
+      const block = section.querySelector('code');
+      fetch(pyFile)
+        .then(r => r.text())
+        .then(text => {
+          block.textContent = text;
+          hljs.highlightElement(block);
+        })
+        .catch(() => block.textContent = 'Could not load file.');
+    }
+
+    addPlot('Very Simple Plot', 'simplest.pdf', 'simplest.svg', 'simplest.py');
+    addPlot('Laser Reaching Saturation', 'laserAtThreshold.pdf', 'laserAtThreshold.svg', 'laserAtThreshold.py');
+    addPlot('A KDE Plot From Seaborn', 'penguins_kde.pdf', 'penguins_kde.svg', 'seapub2.py');
   </script>
 </body>
 

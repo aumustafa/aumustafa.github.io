@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import gaussian_kde
 import tol_colors
 
-pub_style.use(usetex=True)
+pub_style.use()
 
 df = sns.load_dataset("penguins").dropna()
 x = df["body_mass_g"].values
@@ -29,5 +29,5 @@ ax.set_ylim(ymin, ymax)
 ax.set_xlabel("Body mass (g)")
 ax.set_ylabel("Bill depth (mm)")
 
-fig.savefig("penguins_kde")
+fig.savefig("penguins_kde.svg")
 # pub_style.show()
