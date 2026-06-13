@@ -1,21 +1,6 @@
-:root {
-  --bg:        #F7F6F3;
-  --surface:   #FFFFFF;
-  --border:    #E2DDD8;
-  --text:      #1A1916;
-  --muted:     #6B6760;
-  --accent:    #2D6A9F;
-  --accent-dim:#EBF2F9;
-  --code-bg:   #1E1E2E;
-  --code-fg:   #CDD6F4;
-  --radius:    6px;
-  --max-w:     760px;
-}
-
 body {
-    font-family: 'Newsreader', serif;
-    /* font-size: 16pt; */
-    /* font-family: 'Inter', sans-serif; */
+    /* font-size: 14pt; */
+    font-family: 'Inter', sans-serif;
 }
 
 pre, pre code {
@@ -30,8 +15,8 @@ pre, pre code {
 
 code {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.875em;
-  /* background: lightgray; */
+  /* font-size: 0.875em; */
+  /* background: rgb(226, 226, 247); */
   color: darkblue;
   /* padding: 0.1em 0.35em; */
   /* padding: 0.0em 0.35em; */
@@ -40,11 +25,5 @@ code {
 
 
 h1 {
-  /* font-size: 2rem; */
-  font-weight: 400;
-  /* letter-spacing: -0.02em; */
-  /* margin-bottom: 0.35rem; */
-  /* color: var(--text); */
-  /* border-bottom: 2px solid var(--accent); */
-  /* padding-bottom: 0.5rem; */
+  font-weight: 500;
 }
