@@ -5,6 +5,6 @@ X = np.linspace(0, 10, 1000)
 Y = np.sin(X)
 
 pub_style.use()
-fig, ax = pub_style.new_figure()
+fig, ax = pub_style.new_figure(width_mm=56)
 ax.plot(X, Y)
-fig.savefig("simplest.pdf")
+fig.savefig("plots-gallery/simplest.pdf")
