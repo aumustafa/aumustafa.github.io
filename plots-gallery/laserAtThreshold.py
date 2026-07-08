@@ -8,7 +8,7 @@ q_sat = 1e10
 q = 0.5 * q_sat * (y - 1) + 0.5 * q_sat * np.sqrt((y - 1) ** 2 + 4 * y / q_sat)
 
 pub_style.use(serif=True)
-fig, ax = pub_style.new_figure(despine=False, minor_ticks=True, width_mm=56)
+fig, ax = pub_style.new_figure(despine=False, minor_ticks=True)
 
 ax.set_xlabel(r'$g_0 / g_t$')
 ax.set_ylabel(r'$\log\bar{q}_\nu$')

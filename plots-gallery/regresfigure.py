@@ -18,8 +18,7 @@ polynomial_degree = 2
 
 datasets_to_plot = ["setosa", "virginica"]
 
-pub_style.use(False)
-pub_style.use_font('IBM Plex Sans')
+pub_style.use()
 fig, ax = pub_style.new_figure(minor_ticks=True, despine=False, ratio=1)
 
 ax.set_xlabel(f"{feature_names[x_col].capitalize()}")
@@ -105,4 +104,4 @@ ax.set_xlim(x_min - 0.5, x_max + 0.5)
 ax.set_ylim(y_min - 0.5, y_max + 0.5)
 ax.legend()
 
-fig.savefig("plots-gallery/regresfigure.svg")
+fig.savefig("plots-gallery/regresfigure")
