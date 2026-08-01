@@ -16,7 +16,8 @@
 
 body {
   font-family: 'IBM Plex Serif', Georgia, serif;
-  /* font-family: 'DM Sans', Georgia, sans-serif; */
+  /* font-family: 'Manrope', Georgia, sans-serif; */
+  /* font-family: 'Open Sans', Georgia, sans-serif; */
   font-weight: 400;
   /* background-color: var(--bg-color); */
   color: var(--text-color);
@@ -32,7 +33,12 @@ body {
   padding: 4rem 1.5rem;
 }
 
+h3 {
+  font-family: 'IBM Plex Serif', sans-serif;
+}
+
 h1 {
+  font-family: 'IBM Plex Serif', sans-serif;
   /* font-weight: 600; */
   font-size: 2.2rem;
   letter-spacing: -0.02em;
@@ -62,10 +68,10 @@ a:hover {
 code {
   font-family: 'IBM Plex Mono', monospace;
   /* font-size: 0.9em; */
-  background-color: var(--code-bg);
+  /* background-color: var(--code-bg); */
   color: var(--code-text);
   /* padding: 0.15em 0.4em; */
-  border-radius: 4px;
+  /* border-radius: 4px; */
 }
 
 pre {
@@ -111,6 +117,6 @@ pre code {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 20px;
   border: 1px solid var(--border-color);
 }
