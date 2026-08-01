@@ -3,44 +3,64 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Demo of pub_style</title>
+
   <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="../favicon.png" type="image/png" sizes="64x64" />
+  
+  <!-- Fonts & Main Stylesheet -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="../styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet" />
-  <!-- add these two lines to your existing head -->
+
+  <!-- Highlight.js for Code Highlighting -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/color-brewer.min.css"> -->
-   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
-
 </head>
 
 <body>
-  <h1>Showcase of <code>pub_style</code></h1>
-  <p>This is my own package for making prettier plots. I like how plots made with PGFplots
-  look; I think matplotlib figures look unpolished. This module defines a custom style for
-  matplotlib that is inspired by PGFplots and is tuned for reports/publications by
-  default. <i>Features include accessible colour palettes, optional LaTeX fonts, sensible
-  dimensions, and improved styling for fonts, axes, ticks, and the legend</i>—all chosen to look good in a paper. The name was
-  originally supposed to mean "a plot style for publications", but I much prefer the
-  meaning of "plots cooked up pub style", so that's the canon now.</p>
-  <p>This is a demo of <code>pub_style</code> package. I have the plots and then the codes below. Note that using <code>fig.savefig('figure')</code>, that saves as <code>figure.pdf</code>. To save an SVG, for example, do <code>fig.savefig('figure.svg')</code>. Also click on the link of the headers to view the PDF output.</p>
+  <!-- Container added here to match main page centering, margins, and layout -->
+  <main class="container">
+    <header>
+      <p style="margin-bottom: 0.5rem;"><a href="../index.html">&larr; Back to Home</a></p>
+      <h1>Showcase of <code>pub_style</code></h1>
+    </header>
+
+    <section class="description">
+      <p>
+        This is my own package for making prettier plots. I like how plots made with PGFplots
+        look; I think matplotlib figures look unpolished. This module defines a custom style for
+        matplotlib that is inspired by PGFplots and is tuned for reports/publications by
+        default. <i>Features include accessible colour palettes, optional LaTeX fonts, sensible
+        dimensions, and improved styling for fonts, axes, ticks, and the legend</i>—all chosen to look good in a paper. The name was
+        originally supposed to mean "a plot style for publications", but I much prefer the
+        meaning of "plots cooked up pub style", so that's the canon now.
+      </p>
+      <p>
+        This is a demo of <code>pub_style</code> package. I have the plots and then the codes below. Note that using <code>fig.savefig('figure')</code>, that saves as <code>figure.pdf</code>. To save an SVG, for example, do <code>fig.savefig('figure.svg')</code>. Also click on the link of the headers to view the PDF output.
+      </p>
+    </section>
+
+    <!-- Target container for dynamic JS insertion -->
+    <div id="plots-wrapper"></div>
+  </main>
 
   <script>
     function addPlot(title, pdfFile, svgFile, pyFile) {
+      const container = document.getElementById('plots-wrapper');
       const section = document.createElement('div');
+      section.className = 'plot-item';
+      section.style.marginBottom = '2.5rem';
+
       section.innerHTML = `
-        <h3><a href="${pdfFile}" target="_blank">${title}</a></h3>
-        <img src="${svgFile}" alt="plot" style="width: 50%; height: auto;" />
-        <pre><code class="language-python">Loading...</code></pre>
+        <h3 style="margin-bottom: 0.5rem;"><a href="${pdfFile}" target="_blank">${title}</a></h3>
+        <img src="${svgFile}" alt="${title}" style="max-width: 100%; height: auto; border-radius: 4px; margin-bottom: 1rem;" />
+        <pre><code class="language-python">Loading code...</code></pre>
       `;
-      document.body.appendChild(section);
+      container.appendChild(section);
 
       const block = section.querySelector('code');
       fetch(pyFile)

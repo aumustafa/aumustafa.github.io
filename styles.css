@@ -1,34 +1,83 @@
+/* Custom properties for easy color tweaks */
+:root {
+  --bg-color: #fafafa;
+  --text-color: #222222;
+  --accent-color: #004488;
+  --code-bg: #f0f0f5;
+  --code-text: #002b66;
+  --border-color: #e0e0e0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-    /* font-size: 14pt; */
-    font-family: 'IBM Plex Serif', serif;
-    font-weight: 400;
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-weight: 400;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  /* line-height: 1.65; */
+  font-size: 1.125rem; /* ~18px for great readability */
+  -webkit-font-smoothing: antialiased;
 }
 
-pre, pre code {
-  font-family: 'IBM Plex Mono', monospace;
-  background: black;
-  /* padding: 0.1rem; */
-  border-radius: 5px;
-  overflow-x: auto;
-  /* font-size: 0.9rem; */
-  /* line-height: 1.6; */
+/* Centered container with responsive mobile padding */
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
 }
-
-code {
-  font-family: 'IBM Plex Mono', monospace;
-  /* font-size: 0.875em; */
-  /* background: rgb(226, 226, 247); */
-  color: darkblue;
-  /* padding: 0.1em 0.35em; */
-  /* padding: 0.0em 0.35em; */
-  /* border-radius: 3px; */
-}
-
 
 h1 {
-  font-weight: 400;
+  /* font-weight: 600; */
+  font-size: 2.2rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  color: #111;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.75rem;
 }
 
-h3 {
-  font-weight: 500;
+p {
+  margin-bottom: 1.25rem;
+}
+
+/* Link styling */
+a {
+  color: var(--accent-color);
+  text-decoration: underline;
+  /* text-underline-offset: 3px; */
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: #002244;
+}
+
+/* Code block styling */
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  /* font-size: 0.9em; */
+  background-color: var(--code-bg);
+  color: var(--code-text);
+  /* padding: 0.15em 0.4em; */
+  border-radius: 4px;
+}
+
+pre {
+  /* background: #1e1e1e; */
+  color: #f8f8f2;
+  /* padding: 1rem; */
+  /* border-radius: 6px; */
+  /* overflow-x: auto; */
+  /* margin-bottom: 1.25rem; */
+}
+
+pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
 }
