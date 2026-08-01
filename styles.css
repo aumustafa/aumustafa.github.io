@@ -16,8 +16,9 @@
 
 body {
   font-family: 'IBM Plex Serif', Georgia, serif;
+  /* font-family: 'DM Sans', Georgia, sans-serif; */
   font-weight: 400;
-  background-color: var(--bg-color);
+  /* background-color: var(--bg-color); */
   color: var(--text-color);
   /* line-height: 1.65; */
   font-size: 1.125rem; /* ~18px for great readability */
@@ -80,4 +81,36 @@ pre code {
   background: transparent;
   color: inherit;
   padding: 0;
+}
+
+/* Swipeable image gallery */
+.gallery {
+  margin-bottom: 2rem;
+}
+
+.gallery-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: 0.75rem;
+  border-radius: 8px;
+
+  /* Hide scrollbar across browsers */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.gallery-track::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery-track img {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
 }
