@@ -241,8 +241,8 @@ pre code {
   pointer-events: none;
   background: transparent; /* never overrides the page's own background */
   /* Tune these to taste */
-  --dot-color: Wheat;
-  --star-color: Goldenrod;
+  --dot-color: MidnightBlue;
+  --star-color: MidnightBlue;
 }
 
 @media (prefers-reduced-motion: reduce) {
