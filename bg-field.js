@@ -16,7 +16,7 @@
   let shapes = [];
   let pivot = { x: 0, y: 0 };
 
-  const SHAPE_COUNT = 30;
+  const SHAPE_COUNT = 200;
   const ROTATION_PERIOD_MS = 360000; // one full orbit every 3 minutes — deliberately slow
   const ANGULAR_SPEED = (Math.PI * 2) / ROTATION_PERIOD_MS;
 
@@ -51,9 +51,9 @@
     shapes = Array.from({ length: SHAPE_COUNT }, () => ({
       angle: Math.random() * Math.PI * 2,
       radius: minRadius + Math.random() * (maxRadius - minRadius),
-      type: Math.random() < 0.25 ? 'star' : 'dot',
+      type: Math.random() < 0.75 ? 'star' : 'dot',
       size: Math.random() * 2.4 + 1.2,
-      opacity: Math.random() * 0.35 + 0.15,
+      opacity: Math.random() * 0.15 + 0.05,
     }));
   }
 
@@ -67,7 +67,7 @@
   }
 
   function drawStar(x, y, size, opacity, rotation) {
-    const spikes = 4;
+    const spikes = 5;
     const outerR = size * 2.6;
     const innerR = outerR * 0.4;
     ctx.save();
