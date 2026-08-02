@@ -38,10 +38,17 @@
     </header>
 
     <section class="gallery">
-      <div class="gallery-track">
-        <img src="portrait.jpeg" alt="Portrait of Abdullah U. Mustafa" />
-        <img src="inlab.jpeg" alt="Abdullah working in the lab" />
-        <img src="givingtalk.jpeg" alt="Abdullah giving a talk" />
+      <div class="gallery-track" id="galleryTrack">
+        <!-- First image can load eagerly; others set to lazy -->
+        <img src="portrait.jpeg" alt="Portrait of Abdullah U. Mustafa" id="slide-1" />
+        <img src="inlab.jpeg" alt="Abdullah working in the lab" id="slide-2" loading="lazy" />
+        <img src="givingtalk.jpeg" alt="Abdullah giving a talk" id="slide-3" loading="lazy" />
+      </div>
+      <!-- Visual dot indicators for desktop & mobile clarity -->
+      <div class="gallery-dots" aria-label="Gallery pagination">
+        <a href="#slide-1" class="dot active" aria-label="Go to photo 1"></a>
+        <a href="#slide-2" class="dot" aria-label="Go to photo 2"></a>
+        <a href="#slide-3" class="dot" aria-label="Go to photo 3"></a>
       </div>
     </section>
     <p>Usually roaming the halls of Essex Hall. <br>
@@ -52,16 +59,57 @@
       <p>I am a (Medical) Physics undergraduate student at the <a href="https://www.uwindsor.ca/" target="_blank"
           rel="noopener">University of Windsor</a>. I work in the group of <a
           href="https://www.uwindsor.ca/people/thammond/" target="_blank" rel="noopener">T.J. Hammond</a>, wherein I do
-        frequency-resolved optical gating via Kerr-instability amplification; <i>and</i> in the group of <a
+        frequency-resolved optical gating via Kerr instability amplification; <i>and</i> in the group of <a
           href="https://www.uwindsor.ca/people/rehse/" target="_blank" rel="noopener">Steven J. Rehse</a>, wherein I
         perform laser-induced breakdown spectroscopy on bacterial specimens to advance the diagnosis of bacterial
         meningitis.</p>
+      <p>You can find my CV <a href="pdfs/cv-july26.pdf">here</a>.</p>
       <p>
         I wrote a simple mini package for making scientific plots look better called <code>pub_style</code>; you can see
         some of that <a href="plots-gallery/index.html">here</a>.
       </p>
     </section>
+
+    <section class="publications">
+      <h2>Talks &amp; Publications</h2>
+
+      <div class="pub-list">
+
+        <!-- Duplicate this .pub-item block for each new talk or paper -->
+        <a class="pub-item" href="pdfs/MustafaCAP26.pdf" target="_blank" rel="noopener">
+          <img class="pub-thumb" src="pub-thumbs/CAP26thumbnail-alt.png" loading="lazy" />
+          <div class="pub-info">
+            <p class="pub-title">Establishing the limit of detection of laser-induced breakdown spectroscopy for
+              <i>Escherichia. coli</i> in artifical cerebrospinal fluid for the diagnosis of bacterial meningitis
+            </p>
+            <p class="pub-authors"><strong>Abdullah U. Mustafa</strong>, Lauren Dmytrow, ..., Steven J. Rehse</p>
+            <p class="pub-venue">CAP Annual Congress, 2026</p>
+          </div>
+        </a>
+
+        <div class="pub-item pub-item--static">
+          <div class="pub-info">
+            <p class="pub-title">Femtojoule Pulse Reconstruction via Kerr Instability Amplification</p>
+            <p class="pub-authors">Nathan G. Drouillard, <strong>Abdullah U. Mustafa</strong>, TJ Hammond</p>
+            <p class="pub-venue">CAP Annual Congress, 2026 — presented by TJ Hammond</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
   </main>
+  <script>
+    const track = document.getElementById('galleryTrack');
+    const dots = document.querySelectorAll('.gallery-dots .dot');
+
+    track.addEventListener('scroll', () => {
+      const slideWidth = track.clientWidth;
+      const index = Math.round(track.scrollLeft / slideWidth);
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+    });
+  </script>
 </body>
 
 </html>
