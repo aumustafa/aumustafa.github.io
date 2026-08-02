@@ -18,7 +18,7 @@ body {
   font-family: 'IBM Plex Serif', Georgia, serif;
   font-weight: 400;
   color: var(--text-color);
-  font-size: 1.125rem; /* ~18px for great readability */
+  /* font-size: 1.125rem; /* ~18px for great readability */
   -webkit-font-smoothing: antialiased;
 }
 
@@ -195,6 +195,7 @@ pre code {
 .pub-title {
   font-weight: 400;
   color: #111;
+  font-size: 1.125rem;
   margin-bottom: 0.3rem;
   transition: color 0.15s ease;
 }
