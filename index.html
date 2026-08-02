@@ -8,26 +8,26 @@
   <title>Abdullah U. Mustafa</title>
 
   <!-- ===================== SEO METADATA ===================== -->
+  <!-- IMPORTANT: replace YOUR-USERNAME below with your actual GitHub Pages
+       username/URL everywhere it appears (5 places) before publishing. -->
   <meta name="description"
     content="Abdullah U. Mustafa — Medical Physics undergraduate at the University of Windsor, researching ultrafast optics (FROG via Kerr instability amplification) and laser-induced breakdown spectroscopy for bacterial meningitis diagnosis." />
-  <link rel="canonical" href="https://aumustafa.github.io/" />
-
-  <meta name="google-site-verification" content="70Mp6eCOqImi2MtKpCCc3FFLZaOfmCnU-wywrepffaA" />
+  <link rel="canonical" href="https://YOUR-USERNAME.github.io/" />
 
   <!-- Open Graph (Facebook, LinkedIn, Slack, iMessage previews) -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Abdullah U. Mustafa" />
   <meta property="og:description"
-    content="Medical Physics undergraduate at the University of Windsor — ultrafast optics and LIBS research." />
-  <meta property="og:image" content="https://aumustafa.github.io/portrait.jpeg" />
-  <meta property="og:url" content="https://aumustafa.github.io/" />
+    content="Medical Physics undergraduate at the University of Windsor — ultrafast optics and biophotonics research." />
+  <meta property="og:image" content="https://YOUR-USERNAME.github.io/portrait.jpeg" />
+  <meta property="og:url" content="https://YOUR-USERNAME.github.io/" />
 
   <!-- Twitter/X card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Abdullah U. Mustafa" />
   <meta name="twitter:description"
-    content="Medical Physics undergraduate at the University of Windsor — ultrafast optics and LIBS research." />
-  <meta name="twitter:image" content="https://aumustafa.github.io/portrait.jpeg" />
+    content="Medical Physics undergraduate at the University of Windsor — ultrafast optics and biophotonics research." />
+  <meta name="twitter:image" content="https://YOUR-USERNAME.github.io/portrait.jpeg" />
 
   <!-- Structured data: helps Google understand this is a Person's homepage -->
   <script type="application/ld+json">
@@ -35,14 +35,14 @@
     "@context": "https://schema.org",
     "@type": "Person",
     "name": "Abdullah U. Mustafa",
-    "url": "https://aumustafa.github.io/",
+    "url": "https://YOUR-USERNAME.github.io/",
     "email": "mailto:mustaf72@uwindsor.ca",
     "affiliation": {
       "@type": "CollegeOrUniversity",
       "name": "University of Windsor"
     },
     "jobTitle": "Undergraduate Researcher",
-    "image": "https://aumustafa.github.io/portrait.jpeg",
+    "image": "https://YOUR-USERNAME.github.io/portrait.jpeg",
     "sameAs": [
       "https://www.uwindsor.ca/people/thammond/",
       "https://www.uwindsor.ca/people/rehse/"
@@ -73,9 +73,11 @@
     rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="bg-field.css" />
 </head>
 
 <body>
+  <canvas id="bg-field"></canvas>
   <main class="container">
     <header>
       <h1>Abdullah U. Mustafa</h1>
@@ -100,10 +102,9 @@
 
 
     <section class="bio">
-      <p>I am a (Medical) Physics undergraduate student and an undergraduate researcher at the <a
-          href="https://www.uwindsor.ca/" target="_blank" rel="noopener">University of Windsor</a>. I work in the group
-        of <a href="https://www.uwindsor.ca/people/thammond/" target="_blank" rel="noopener">T.J. Hammond</a>, wherein I
-        do
+      <p>I am a (Medical) Physics undergraduate student at the <a href="https://www.uwindsor.ca/" target="_blank"
+          rel="noopener">University of Windsor</a>. I work in the group of <a
+          href="https://www.uwindsor.ca/people/thammond/" target="_blank" rel="noopener">T.J. Hammond</a>, wherein I do
         frequency-resolved optical gating via Kerr instability amplification; <i>and</i> in the group of <a
           href="https://www.uwindsor.ca/people/rehse/" target="_blank" rel="noopener">Steven J. Rehse</a>, wherein I
         perform laser-induced breakdown spectroscopy on bacterial specimens to advance the diagnosis of bacterial
@@ -143,6 +144,7 @@
       </div>
     </section>
   </main>
+  <script src="bg-field.js"></script>
   <script>
     const track = document.getElementById('galleryTrack');
     const dots = document.querySelectorAll('.gallery-dots .dot');

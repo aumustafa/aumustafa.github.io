@@ -1,6 +1,7 @@
 /* Custom properties for easy color tweaks */
 :root {
   --bg-color: #fafafa;
+  /* --bg-color: MintCream; */
   --text-color: #222222;
   --accent-color: #004488;
   --code-bg: #f0f0f5;
@@ -16,6 +17,8 @@
 
 body {
   font-family: 'IBM Plex Serif', Georgia, serif;
+  /* font-family: 'Alegreya', Georgia, serif; */
+  /* font-family: 'Manrope', Georgia, sans-serif; */
   font-weight: 400;
   color: var(--text-color);
   /* font-size: 1.125rem; /* ~18px for great readability */
@@ -29,12 +32,12 @@ body {
   padding: 4rem 1.5rem;
 }
 
-h3 {
-  font-family: 'IBM Plex Serif', sans-serif;
-}
+/* h3 { */
+  /* font-family: 'IBM Plex Serif', sans-serif; */
+/* } */
 
 h1 {
-  font-family: 'IBM Plex Serif', sans-serif;
+  /* font-family: 'IBM Plex Serif', sans-serif; */
   font-size: 2.2rem;
   letter-spacing: -0.02em;
   margin-bottom: 1.5rem;
@@ -205,7 +208,7 @@ pre code {
 }
 
 .pub-authors {
-  font-size: 0.9rem;
+  /* font-size: 0.9rem; */
   color: var(--text-color);
   margin-bottom: 0.2rem;
 }
@@ -229,3 +232,22 @@ pre code {
     aspect-ratio: 16 / 9;
   }
 }
+
+/* ================= Ambient background: orbiting dots & stars (bg-field.js) ================= */
+#bg-field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: transparent; /* never overrides the page's own background */
+  /* Tune these to taste */
+  --dot-color: Wheat;
+  --star-color: Goldenrod;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #bg-field {
+    display: none;
+  }
+}
+/* =============== end ambient background =============== */
