@@ -1,6 +1,3 @@
-/* =====================================================
-   Design tokens
-   ===================================================== */
 :root {
   /* Color — navy + off-white, warmed toward paper */
   --bg-color: white;
@@ -10,7 +7,7 @@
   --accent-deep: #00223f;
   --code-bg: #f0ece2;
   --code-text: #002b66;
-  --border-color: var(--code-bg);
+  --border-color: Silver;
 
   /* Type */
   --font-serif: 'IBM Plex Serif', Georgia, serif;
@@ -53,6 +50,7 @@ header {
 h1 {
   font-size: 4rem;
   font-weight: 300;
+  font-style: italic;
   letter-spacing: -0.01em;
   color: var(--accent-deep);
   border-top: 1px solid var(--text-color);
@@ -77,10 +75,10 @@ p {
 /* ---------------------------------------------------------
    Bio section
 --------------------------------------------------------- */
-.bio p {
-  text-align: justify;
-  hyphens: auto;
-}
+/* .bio p { */
+  /* text-align: justify; */
+  /* hyphens: auto; */
+/* } */
 
 /* Link styling */
 a {
@@ -148,7 +146,7 @@ pre code {
   flex: 0 0 100%;
   scroll-snap-align: center;
   width: 100%;
-  aspect-ratio: 1.618;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 4px;
   border: 1px solid var(--border-color);
@@ -228,7 +226,7 @@ pre code {
   flex: 0 0 auto;
   width: 220px;
   height: 136px;
-  object-fit: cover;
+  object-fit: contain;
   border: 1px solid var(--border-color);
 }
 
@@ -238,7 +236,6 @@ pre code {
 }
 
 .pub-title {
-  font-weight: 400;
   font-style: italic;
   color: var(--accent-deep);
   font-size: 1.08rem;
