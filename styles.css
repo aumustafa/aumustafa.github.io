@@ -1,7 +1,6 @@
 /* Custom properties for easy color tweaks */
 :root {
   --bg-color: #fafafa;
-  /* --bg-color: MintCream; */
   --text-color: #222222;
   --accent-color: #004488;
   --code-bg: #f0f0f5;
@@ -17,11 +16,8 @@
 
 body {
   font-family: 'IBM Plex Serif', Georgia, serif;
-  /* font-family: 'Alegreya', Georgia, serif; */
-  /* font-family: 'Manrope', Georgia, sans-serif; */
   font-weight: 400;
   color: var(--text-color);
-  /* font-size: 1.125rem; /* ~18px for great readability */
   -webkit-font-smoothing: antialiased;
 }
 
@@ -32,12 +28,7 @@ body {
   padding: 4rem 1.5rem;
 }
 
-/* h3 { */
-  /* font-family: 'IBM Plex Serif', sans-serif; */
-/* } */
-
 h1 {
-  /* font-family: 'IBM Plex Serif', sans-serif; */
   font-size: 2.2rem;
   letter-spacing: -0.02em;
   margin-bottom: 1.5rem;
@@ -106,13 +97,12 @@ pre code {
   flex: 0 0 100%;
   scroll-snap-align: center;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1.618;
   object-fit: cover;
   border-radius: 20px;
   border: 1px solid var(--border-color);
 }
 
-/* Gallery Dot Indicators */
 .gallery-dots {
   display: flex;
   justify-content: center;
@@ -185,7 +175,6 @@ pre code {
   width: 110px;
   height: 80px;
   object-fit: cover;
-  border-radius: 8px;
   border: 1px solid var(--border-color);
 }
 
@@ -207,7 +196,6 @@ pre code {
 }
 
 .pub-authors {
-  /* font-size: 0.9rem; */
   color: var(--text-color);
   margin-bottom: 0.2rem;
 }
@@ -215,7 +203,7 @@ pre code {
 .pub-venue {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.82rem;
-  color: #444; /* Improved contrast ratio for accessibility */
+  color: #444;
   margin-bottom: 0;
 }
 
@@ -228,18 +216,19 @@ pre code {
   .pub-thumb {
     width: 100%;
     height: auto;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 1.618;
   }
 }
 
-/* ================= Ambient background: orbiting dots & stars (bg-field.js) ================= */
+/* ---------------------------------------------------------
+   Ambient background: orbiting dots & stars (bg-field.js)
+--------------------------------------------------------- */
 #bg-field {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   background: transparent; /* never overrides the page's own background */
-  /* Tune these to taste */
   --dot-color: MidnightBlue;
   --star-color: MidnightBlue;
 }
@@ -249,4 +238,3 @@ pre code {
     display: none;
   }
 }
-/* =============== end ambient background =============== */
