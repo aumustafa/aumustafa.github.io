@@ -1,11 +1,20 @@
-/* Custom properties for easy color tweaks */
+/* =====================================================
+   Design tokens
+   ===================================================== */
 :root {
-  --bg-color: #fafafa;
-  --text-color: #222222;
+  /* Color — navy + off-white, warmed toward paper */
+  --bg-color: white;
+  --text-color: #2a2420;
+  --muted-color: #6b6258;
   --accent-color: #004488;
-  --code-bg: #f0f0f5;
+  --accent-deep: #00223f;
+  --code-bg: #f0ece2;
   --code-text: #002b66;
-  --border-color: #e0e0e0;
+  --border-color: var(--code-bg);
+
+  /* Type */
+  --font-serif: 'IBM Plex Serif', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', 'Source Code Pro', monospace;
 }
 
 * {
@@ -14,52 +23,93 @@
   padding: 0;
 }
 
+/* html {
+  background: var(--bg-color);
+} */
+
 body {
-  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-family: var(--font-serif);
   font-weight: 400;
   color: var(--text-color);
+  /* background: var(--bg-color); */
   -webkit-font-smoothing: antialiased;
 }
 
 /* Centered container with responsive mobile padding */
 .container {
-  max-width: 680px;
+  max-width: 700px;
   margin: 0 auto;
-  padding: 4rem 1.5rem;
+  padding: 2.5rem 1.5rem 3rem;
+}
+
+/* ---------------------------------------------------------
+   Masthead
+--------------------------------------------------------- */
+header {
+  margin-bottom: 1.5rem;
 }
 
 h1 {
-  font-size: 2.2rem;
-  letter-spacing: -0.02em;
-  margin-bottom: 1.5rem;
-  color: #111;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.75rem;
+  font-size: 2.35rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--accent-deep);
+  border-top: 1px solid var(--text-color);
+  border-bottom: 3px double var(--border-color);
+  padding: 0.6rem 0 0.6rem;
 }
 
 p {
   margin-bottom: 1.25rem;
 }
 
+/* The byline paragraph right after the gallery (location + email) */
+.gallery + p {
+  font-style: italic;
+  color: var(--muted-color);
+  font-size: 0.95rem;
+  text-align: center;
+  margin-top: -0.3rem;
+}
+
+/* ---------------------------------------------------------
+   Bio section
+--------------------------------------------------------- */
+.bio p {
+  text-align: justify;
+  hyphens: auto;
+}
+
 /* Link styling */
 a {
   color: var(--accent-color);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 1px;
   transition: color 0.15s ease;
 }
 
 a:hover {
-  color: #002244;
+  color: var(--accent-deep);
 }
 
-/* Code block styling */
+/* Code styling */
 code {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--font-mono);
   color: var(--code-text);
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.9em;
 }
 
 pre {
-  color: #f8f8f2;
+  background: var(--code-bg);
+  color: var(--code-text);
+  /* padding: 1rem 1.25rem; */
+  /* border-radius: 6px; */
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
 }
 
 pre code {
@@ -82,9 +132,8 @@ pre code {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   gap: 0.75rem;
-  border-radius: 8px;
+  border-radius: 6px;
 
-  /* Hide scrollbar across browsers */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -99,20 +148,21 @@ pre code {
   width: 100%;
   aspect-ratio: 1.618;
   object-fit: cover;
-  border-radius: 20px;
+  border-radius: 4px;
   border: 1px solid var(--border-color);
+  filter: sepia(6%);
 }
 
 .gallery-dots {
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 0.75rem;
+  margin-top: 0.85rem;
 }
 
 .gallery-dots .dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background-color: var(--border-color);
   transition: background-color 0.2s ease, transform 0.2s ease;
@@ -122,23 +172,25 @@ pre code {
 .gallery-dots .dot:hover,
 .gallery-dots .dot.active {
   background-color: var(--accent-color);
-  transform: scale(1.25);
+  transform: scale(1.3);
 }
 
 /* ---------------------------------------------------------
-   Talks & Publications
+   Talks & Publications — set as a numbered bibliography
 --------------------------------------------------------- */
 .publications {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .publications h2 {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
+  font-weight: 400;
+  font-style: italic;
   letter-spacing: -0.01em;
-  color: #111;
+  color: var(--accent-deep);
   margin-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--text-color);
 }
 
 .pub-list {
@@ -148,11 +200,11 @@ pre code {
 
 .pub-item {
   display: flex;
-  gap: 1rem;
+  gap: 1.1rem;
   align-items: flex-start;
   text-decoration: none;
   color: inherit;
-  padding: 1.25rem 0;
+  padding: 1rem 0;
   border-bottom: 1px solid var(--border-color);
   transition: transform 0.15s ease;
 }
@@ -172,8 +224,8 @@ pre code {
 
 .pub-thumb {
   flex: 0 0 auto;
-  width: 110px;
-  height: 80px;
+  width: 220px;
+  height: 136px;
   object-fit: cover;
   border: 1px solid var(--border-color);
 }
@@ -185,8 +237,10 @@ pre code {
 
 .pub-title {
   font-weight: 400;
-  color: #111;
-  font-size: 1.125rem;
+  font-style: italic;
+  color: var(--accent-deep);
+  font-size: 1.08rem;
+  line-height: 1.4;
   margin-bottom: 0.3rem;
   transition: color 0.15s ease;
 }
@@ -197,13 +251,16 @@ pre code {
 
 .pub-authors {
   color: var(--text-color);
+  font-size: 0.95rem;
   margin-bottom: 0.2rem;
 }
 
 .pub-venue {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.82rem;
-  color: #444;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-color);
   margin-bottom: 0;
 }
 
@@ -228,9 +285,10 @@ pre code {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: transparent; /* never overrides the page's own background */
-  --dot-color: MidnightBlue;
-  --star-color: MidnightBlue;
+  background: transparent;
+  --dot-color: var(--accent-color);
+  --star-color: var(--accent-color);
+  opacity: 0.6;
 }
 
 @media (prefers-reduced-motion: reduce) {
