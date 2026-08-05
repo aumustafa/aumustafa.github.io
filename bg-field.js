@@ -16,8 +16,8 @@
   let shapes = [];
   let pivot = { x: 0, y: 0 };
 
-  const SHAPE_COUNT = 4200;
-  const COMET_FRACTION = 0.005; // ~6% of dots trail a tail
+  const SHAPE_COUNT = 2000;
+  const COMET_FRACTION = 0.01; // ~6% of dots trail a tail
   const ROTATION_PERIOD_MS = 360000 * 2; // one full orbit every 3 minutes — deliberately slow
   const ANGULAR_SPEED = (Math.PI * 2) / ROTATION_PERIOD_MS;
 
