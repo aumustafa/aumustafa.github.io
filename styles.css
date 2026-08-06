@@ -27,7 +27,7 @@
 } */
 
 body {
-  font-size: 1.125rem;
+  /* font-size: 1.125rem; */
   font-family: var(--body-font);
   font-weight: 400;
   color: var(--text-color);
@@ -184,7 +184,7 @@ pre code {
   margin-top: 0.5rem;
 }
 
-.publications h2 {
+h2 {
   font-size: 1.3rem;
   font-weight: 400;
   font-style: italic;
