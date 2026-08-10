@@ -1,0 +1,2 @@
+Revert to SSH in the future with
+git remote set-url origin git@github.com:aumustafa/aumustafa.github.io.git

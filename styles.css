@@ -1,6 +1,6 @@
 :root {
   /* Color — navy + off-white, warmed toward paper */
-  --bg-color: white;
+  /* --bg-color: wheat; */
   --text-color: #2a2420;
   --muted-color: #6b6258;
   --accent-color: #004488;
@@ -77,10 +77,10 @@ p {
 /* ---------------------------------------------------------
    Bio section
 --------------------------------------------------------- */
-/* .bio p { */
-  /* text-align: justify; */
-  /* hyphens: auto; */
-/* } */
+.bio p {
+  text-align: justify;
+  hyphens: manual;
+}
 
 /* Link styling */
 a {
