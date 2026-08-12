@@ -10,9 +10,9 @@
   --border-color: Silver;
 
   /* Type */
-  --body-font: 'IBM Plex Serif', Georgia, serif;
+  --body-font: 'Lora', 'IBM Plex Serif', Georgia, serif;
   /* --body-font: 'Wittgenstein', Georgia, serif; */
-  /* --body-font: 'Inter', Georgia, sans-serif; */
+  /* --body-font: 'Helvetica Neue', 'Inter', Georgia, sans-serif; */
   --font-mono: 'IBM Plex Mono', 'Source Code Pro', monospace;
 }
 
@@ -29,7 +29,7 @@
 body {
   /* font-size: 1.125rem; */
   font-family: var(--body-font);
-  font-weight: 400;
+  font-weight: 500;
   color: var(--text-color);
   /* background: var(--bg-color); */
   -webkit-font-smoothing: antialiased;
@@ -77,10 +77,10 @@ p {
 /* ---------------------------------------------------------
    Bio section
 --------------------------------------------------------- */
-.bio p {
-  text-align: justify;
-  hyphens: manual;
-}
+/* .bio p { */
+  /* text-align: justify; */
+  /* hyphens: auto; */
+/* } */
 
 /* Link styling */
 a {
@@ -238,7 +238,7 @@ h2 {
 }
 
 .pub-title {
-  font-style: italic;
+  /* font-style: italic; */
   color: var(--accent-deep);
   font-size: 1.08rem;
   line-height: 1.4;
