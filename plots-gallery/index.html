@@ -22,6 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif:opsz@12..24&display=swap" rel="stylesheet">
 
   
   <link rel="stylesheet" href="../styles.css" />
@@ -67,10 +68,19 @@
 
       section.innerHTML = `
         <h3 style="margin-bottom: 0.5rem;"><a href="${pdfFile}" target="_blank">${title}</a></h3>
-        <img src="${svgFile}" alt="${title}" style="max-width: 100%; height: auto; border-radius: 4px; margin-bottom: 1rem;" />
-        <pre><code class="language-python">Loading code...</code></pre>
+        <img src="${svgFile}" alt="${title}" style="display: block; width: 75%; height: auto; border-radius: 4px; margin-bottom: 1rem;" />
+        <details class="code-details">
+          <summary>Show code</summary>
+          <pre><code class="language-python">Loading code...</code></pre>
+        </details>
       `;
       container.appendChild(section);
+
+      const details = section.querySelector('.code-details');
+      const summary = details.querySelector('summary');
+      details.addEventListener('toggle', () => {
+        summary.textContent = details.open ? 'Hide code' : 'Show code';
+      });
 
       const block = section.querySelector('code');
       fetch(pyFile)

@@ -74,6 +74,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif:opsz@12..24&display=swap" rel="stylesheet">
 
 
   <link rel="stylesheet" href="styles.css" />
@@ -81,44 +82,50 @@
 
 <body>
   <canvas id="bg-field"></canvas>
-  <main class="container">
-    <header>
+  <div class="page">
+
+    <aside class="sidebar">
       <h1>Abdullah U. Mustafa</h1>
-    </header>
 
-    <section class="gallery">
-      <div class="gallery-track" id="galleryTrack">
-        <!-- First image can load eagerly; others set to lazy -->
-        <img src="portrait.jpeg" alt="Portrait of Abdullah U. Mustafa" id="slide-1" />
-        <img src="inlab.jpeg" alt="Abdullah working in the lab" id="slide-2" loading="lazy" />
-        <img src="givingtalk.jpeg" alt="Abdullah giving a talk" id="slide-3" loading="lazy" />
-      </div>
-      <!-- Visual dot indicators for desktop & mobile clarity -->
-      <div class="gallery-dots" aria-label="Gallery pagination">
-        <a href="#slide-1" class="dot active" aria-label="Go to photo 1"></a>
-        <a href="#slide-2" class="dot" aria-label="Go to photo 2"></a>
-        <a href="#slide-3" class="dot" aria-label="Go to photo 3"></a>
-      </div>
-    </section>
-    <p>Email: <a href="mailto:mustaf72@uwindsor.ca">mustaf72@uwindsor.ca</a></p>
+      <section class="gallery">
+        <div class="gallery-track" id="galleryTrack">
+          <!-- First image can load eagerly; others set to lazy -->
+          <img src="portrait.jpeg" alt="Portrait of Abdullah U. Mustafa" id="slide-1" />
+          <img src="inlab.jpeg" alt="Abdullah working in the lab" id="slide-2" loading="lazy" />
+          <img src="givingtalk.jpeg" alt="Abdullah giving a talk" id="slide-3" loading="lazy" />
+        </div>
+        <!-- Visual dot indicators for desktop & mobile clarity -->
+        <div class="gallery-dots" aria-label="Gallery pagination">
+          <a href="#slide-1" class="dot active" aria-label="Go to photo 1"></a>
+          <a href="#slide-2" class="dot" aria-label="Go to photo 2"></a>
+          <a href="#slide-3" class="dot" aria-label="Go to photo 3"></a>
+        </div>
+      </section>
 
+      <nav class="sidebar-links" aria-label="Quick links">
+        <a href="mailto:mustaf72@uwindsor.ca">mustaf72@uwindsor.ca</a>
+        <span class="sidebar-links-sep" aria-hidden="true">&middot;</span>
+        <a href="pdfs/cv-july26.pdf">CV</a>
+      </nav>
+    </aside>
 
-    <section class="bio">
-      <p>I am a (Medical) Physics undergraduate student at the <a href="https://www.uwindsor.ca/" target="_blank"
-          rel="noopener">University of Windsor</a>. I work in the group of <a
-          href="https://www.uwindsor.ca/people/thammond/" target="_blank" rel="noopener">T.J. Hammond</a>, wherein I do
-        frequency-resolved optical gating via Kerr instability amplification; <i>and</i> in the group of <a
-          href="https://www.uwindsor.ca/people/rehse/" target="_blank" rel="noopener">Steven J. Rehse</a>, wherein I
-        perform laser-induced breakdown spectroscopy on bacterial specimens to advance the diagnosis of bacterial
-        meningitis.</p>
-      <p>You can find my CV <a href="pdfs/cv-july26.pdf">here</a>.</p>
-      <p>
-        I wrote a simple mini package for making scientific plots look better called <code>pub_style</code>; you can see
-        some of that <a href="plots-gallery/index.html">here</a>.
-      </p>
-    </section>
+    <main class="content">
 
-    <section class="publications">
+      <section class="bio">
+        <p>I am a (Medical) Physics undergraduate student at the <a href="https://www.uwindsor.ca/" target="_blank"
+            rel="noopener">University of Windsor</a>. I work in the group of <a
+            href="https://www.uwindsor.ca/people/thammond/" target="_blank" rel="noopener">T.J. Hammond</a>, wherein I do
+          frequency-resolved optical gating via Kerr instability amplification; <i>and</i> in the group of <a
+            href="https://www.uwindsor.ca/people/rehse/" target="_blank" rel="noopener">Steven J. Rehse</a>, wherein I
+          perform laser-induced breakdown spectroscopy on bacterial specimens to advance the diagnosis of bacterial
+          meningitis.</p>
+        <p>
+          I wrote a simple mini package for making scientific plots look better called <code>pub_style</code>; you can see
+          some of that <a href="plots-gallery/index.html">here</a>.
+        </p>
+      </section>
+
+      <section class="publications">
       <h2>Talks &amp; Publications</h2>
 
       <div class="pub-list">
@@ -154,9 +161,11 @@
         </a>
 
       </div>
-    </section>
-  </main>
-  <script src="bg-field.js"></script>
+      </section>
+
+    </main>
+  </div>
+  <!-- <script src="bg-field.js"></script> -->
   <script>
     const track = document.getElementById('galleryTrack');
     const dots = document.querySelectorAll('.gallery-dots .dot');
