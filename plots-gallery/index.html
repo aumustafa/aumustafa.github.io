@@ -40,10 +40,84 @@
         meaning of "plots cooked up pub style", so that's the canon now.
       </p>
       <p>
-        This is a demo of <code>pub_style</code> package. I have the plots and then the codes below. Note that using <code>fig.savefig('figure')</code>, that saves as <code>figure.pdf</code>. To save an SVG, for example, do <code>fig.savefig('figure.svg')</code>. Also click on the link of the headers to view the PDF output.
+        Here I have some sample creations with the package. It runs on top of matplotlib, and in most cases, importing matplotlib is not necessary. The standard use loop is calling <code>pub_style.use()</code> once to load the global style settings. Then, for every separate figure, <code>fig, ax = pub_style.new_figure()</code>, which gives a Figure for <code>fig</code> and either an Axes or an ndarray of Axes for <code>ax</code>, which are what you would use for matplotlib. After plotting your data, you can call <code>fig.savefig('figure')</code> (which by default saves files to PDFs; do <code>fig.savefig('figure.svg')</code> to save as an SVG) to export the figure.
       </p>
+      <p>
+        There are also some helper functions. <code>pub_style.copy()</code> copies the figure as a PNG to the clipboard (macOS only), which is really handy for making presentations. <code>pub_style.griddify()</code> applies a stylized grid to a given set of Axes or to the current axis.
+      </p>
+      <p> Below is the full API reference (directly copied from the source code) and further below are some <a href="#example-plots">example creations</a>.</p>
     </section>
 
+    <h2>API Reference</h2>
+    <section class="api-reference">
+
+      <div class="api-entry">
+        <h3><code>use(usetex=True, serif=False, presentation=False, colours='bright', custom_preamble=None, N=10)</code></h3>
+        <p>Applies the pub_style rcParams globally. Call once at the top of a script, before creating any figures.</p>
+        <ul class="api-params">
+          <li><code>usetex</code> — use LaTeX for text rendering (requires a working LaTeX install). Default <code>True</code>.</li>
+          <li><code>serif</code> — loads Helvetica + sfmath when <code>False</code>, or newtxtext/newtxmath (Times-based) when <code>True</code>. Also sets <code>font.family</code>. Ignored when <code>usetex=False</code> — use <code>use_font()</code> instead.</li>
+          <li><code>presentation</code> — scales up axis/title label sizes for slides. Default <code>False</code>.</li>
+          <li><code>colours</code> — a Tol colorset key (e.g. <code>'bright'</code>, <code>'muted'</code>), a Tol or matplotlib colormap name (resampled into <code>N</code> colours), or an explicit list/tuple of colours.</li>
+          <li><code>custom_preamble</code> — overrides the LaTeX preamble chosen by <code>serif</code>, for loading a font not covered by the two presets.</li>
+          <li><code>N</code> — number of colours to sample when <code>colours</code> is a colormap name. Ignored otherwise. Default <code>10</code>.</li>
+        </ul>
+      </div>
+
+      <div class="api-entry">
+        <h3><code>use_font(name, serif=None)</code></h3>
+        <p>Sets the matplotlib font when <em>not</em> using LaTeX — a convenience for after calling <code>use(usetex=False)</code>, since matplotlib's default fonts are a poor substitute for a proper typeset font.</p>
+        <ul class="api-params">
+          <li><code>name</code> — the font family name (e.g. <code>"Helvetica"</code>, <code>"Times New Roman"</code>), must be installed and discoverable by matplotlib's font manager.</li>
+          <li><code>serif</code> — registers the font as serif or sans-serif. If <code>None</code>, inferred from the current <code>font.family</code> rcParam as set by <code>use()</code>.</li>
+        </ul>
+      </div>
+
+      <div class="api-entry">
+        <h3><code>new_figure(nrows=1, ncols=1, despine=True, minor_ticks=False, width_mm=86, ratio=None, **kwargs)</code></h3>
+        <p>Creates a new figure with one or more subplots at publication-appropriate dimensions. Width is given in mm and converted to inches; height is derived from the aspect ratio. Uses matplotlib's constrained layout engine to avoid clipped labels/titles. Extra kwargs are forwarded to <code>plt.subplots()</code> (e.g. <code>sharex</code>, <code>gridspec_kw</code>).</p>
+        <ul class="api-params">
+          <li><code>nrows</code>, <code>ncols</code> — grid of subplots. Default <code>1, 1</code>.</li>
+          <li><code>despine</code> — removes the top/right spines for a cleaner, PGFplots-like look, with ticks pointing in and out. When <code>False</code>, keeps all four spines with ticks pointing in only. Default <code>True</code>.</li>
+          <li><code>minor_ticks</code> — shows minor ticks on both axes. Default <code>False</code>.</li>
+          <li><code>width_mm</code> — figure width in mm. Single-column figures are typically 85–90&nbsp;mm, full-width 180–183&nbsp;mm. Default <code>86</code>.</li>
+          <li><code>ratio</code> — width/height aspect ratio. Defaults to <code>GOLDEN_RATIO * ncols / nrows</code>, so each subplot cell is golden-ratio shaped. Use <code>1.0</code> for square.</li>
+        </ul>
+        <p class="api-returns">A <code>Figure</code> and either a single <code>Axes</code> (1×1 grid) or a 2D array of <code>Axes</code>.</p>
+      </div>
+
+      <div class="api-entry">
+        <h3><code>show()</code></h3>
+        <p>Displays all open figures — a thin wrapper around <code>matplotlib.pyplot.show()</code> so you don't need to import matplotlib directly.</p>
+      </div>
+
+      <div class="api-entry">
+        <h3><code>copy(fig=None, dpi=300)</code></h3>
+        <p>Copies a figure to the clipboard as a PNG. macOS only — handy for pasting straight into presentations.</p>
+        <ul class="api-params">
+          <li><code>fig</code> — figure to copy. If <code>None</code>, uses the current active figure.</li>
+          <li><code>dpi</code> — resolution of the copied image. Default <code>300</code>.</li>
+        </ul>
+      </div>
+
+      <div class="api-entry">
+        <h3><code>reset()</code></h3>
+        <p>Resets matplotlib's styling back to its defaults.</p>
+      </div>
+
+      <div class="api-entry">
+        <h3><code>griddify(ax=None, major=True, minor=True, major_alpha=0.6, minor_alpha=0.3)</code></h3>
+        <p>Adds nice-looking grid lines to one or more axes. Not something you'd want in a paper or report figure, but useful for "large" figures or data exploration.</p>
+        <ul class="api-params">
+          <li><code>ax</code> — a single <code>Axes</code>, an ndarray of <code>Axes</code> (as returned by <code>new_figure()</code>), or <code>None</code> for the current active axes.</li>
+          <li><code>major</code> / <code>minor</code> — show major/minor grid lines. Both default <code>True</code>.</li>
+          <li><code>major_alpha</code> / <code>minor_alpha</code> — opacity of major/minor grid lines. Default <code>0.6</code> / <code>0.3</code>.</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <h2 id="example-plots">Example Plots</h2>
     <!-- Target container for dynamic JS insertion -->
     <div id="plots-wrapper"></div>
   </main>

@@ -6,6 +6,7 @@
   --accent-color: #004488;
   --accent-deep: #00223f;
   --code-text: #002b66;
+  --code-bg: GhostWhite;
   --border-color: Silver;
 
   /* Type */
@@ -216,10 +217,10 @@ a:hover {
 code {
   font-family: var(--font-mono);
   color: var(--code-text);
-  /* background: var(--code-bg); */
+  background: var(--code-bg);
   /* padding: 0.1em 0.35em; */
   /* border-radius: 3px; */
-  /* font-size: 0.9em; */
+  font-size: 0.95em;
 }
 
 pre {
@@ -377,7 +378,7 @@ h2 {
   /* font-family: var(--font-mono); */
   font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   color: var(--muted-color);
   margin-bottom: 0;
 }
@@ -396,42 +397,73 @@ h2 {
 }
 
 /* ---------------------------------------------------------
-   Responsive: stack sidebar above content on narrow screens
+   API reference — one entry per function, on the pub_style page.
+   Signatures read as code; each entry gets a quiet left rule so the
+   block reads as a distinct reference unit without a boxed/card look.
 --------------------------------------------------------- */
-@media (max-width: 760px) {
-  .page {
-    flex-direction: column;
-    gap: 0;
-    padding: 2rem 1.5rem 3rem;
-  }
-
-  .sidebar {
-    flex: 1 1 auto;
-    width: 100%;
-  }
-
-  .content {
-    width: 100%;
-    padding-top: 0;
-  }
+.api-reference {
+  margin-top: 0.5rem;
 }
 
-/* ---------------------------------------------------------
-   Ambient background: orbiting dots & stars (bg-field.js)
---------------------------------------------------------- */
-#bg-field {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: transparent;
-  --dot-color: var(--accent-color);
-  --star-color: var(--accent-color);
-  opacity: 0.6;
+.api-entry {
+  padding: 0 0 1.5rem 1rem;
+  margin-bottom: 1.5rem;
+  border-left: 2px solid var(--border-color);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  #bg-field {
-    display: none;
-  }
+.api-entry:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.api-entry h3 {
+  margin-bottom: 0.6rem;
+  line-height: 1.25;
+  /* allow long signatures to wrap without overflowing the column */
+  overflow-wrap: break-word;
+}
+
+.api-entry h3 code {
+  font-size: 0.85em;
+}
+
+.api-entry > p {
+  margin-bottom: 0.75rem;
+}
+
+.api-params {
+  list-style: none;
+  margin-bottom: 0.75rem;
+}
+
+.api-params li {
+  position: relative;
+  padding-left: 1.1rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.95rem;
+}
+
+.api-params li:last-child {
+  margin-bottom: 0;
+}
+
+.api-params li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
+  color: var(--muted-color);
+}
+
+.api-returns {
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+.api-returns::before {
+  content: 'Returns: ';
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-color);
 }
