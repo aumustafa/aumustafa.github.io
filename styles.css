@@ -58,6 +58,20 @@ body {
   padding-top: 0.4rem;
 }
 
+/* Stack sidebar above content on narrow / mobile screens */
+@media (max-width: 700px) {
+  .page {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 2rem 1.25rem 2.5rem;
+  }
+
+  .sidebar {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
 /* ---------------------------------------------------------
    Standalone sub-pages (e.g. the pub_style showcase) —
    a simple single-column container matching the site's look,
