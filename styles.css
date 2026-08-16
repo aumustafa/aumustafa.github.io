@@ -10,9 +10,8 @@
 
   /* Type */
   /* --body-font: 'IBM Plex Serif', Georgia, serif; */
-  /* --body-font: 'Wittgenstein', Georgia, serif; */
-  --body-font: 'Figtree', 'Helvetica Neue', 'Plus Jakarta Sans', 'Inter', sans-serif;
-  --font-mono: 'IBM Plex Mono', 'Source Code Pro', monospace;
+  --body-font: system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 }
 
 * {
@@ -26,7 +25,6 @@ html {
 }
 
 body {
-  /* font-size: 1.125rem; */
   font-family: var(--body-font);
   font-weight: 400;
   color: var(--text-color);
@@ -253,7 +251,7 @@ pre code {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   gap: 0.75rem;
-  border-radius: 6px;
+  border-radius: 1px;
 
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -376,10 +374,10 @@ h2 {
 }
 
 .pub-venue {
-  font-family: var(--font-mono);
+  /* font-family: var(--font-mono); */
   font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   color: var(--muted-color);
   margin-bottom: 0;
 }
