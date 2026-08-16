@@ -6,8 +6,11 @@
   --accent-color: #004488;
   --accent-deep: #00223f;
   --code-text: #002b66;
-  --code-bg: GhostWhite;
+  --code-bg: white;
   --border-color: Silver;
+  /* --accent-color: #440088; */
+  /* --accent-deep: #22003f; */
+  /* --code-text: #2b0066; */
 
   /* Type */
   /* --body-font: 'IBM Plex Serif', Georgia, serif; */
@@ -218,7 +221,7 @@ p {
 a {
   color: var(--accent-color);
   text-decoration: underline;
-  text-decoration-thickness: 1px;
+  text-decoration-thickness: 0.5px;
   text-underline-offset: 1px;
   transition: color 0.15s ease;
 }
@@ -234,7 +237,7 @@ code {
   background: var(--code-bg);
   /* padding: 0.1em 0.35em; */
   /* border-radius: 3px; */
-  font-size: 0.95em;
+  /* font-size: 0.95em; */
 }
 
 pre {
@@ -389,7 +392,7 @@ h2 {
 }
 
 .pub-venue {
-  /* font-family: var(--font-mono); */
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -417,12 +420,13 @@ h2 {
 --------------------------------------------------------- */
 .api-reference {
   margin-top: 0.5rem;
+  margin-bottom: 2rem;
 }
 
 .api-entry {
-  padding: 0 0 1.5rem 1rem;
+  /* padding: 0 0 1.5rem 1rem; */
   margin-bottom: 1.5rem;
-  border-left: 2px solid var(--border-color);
+  /* border-left: 1px solid var(--border-color); */
 }
 
 .api-entry:last-child {
