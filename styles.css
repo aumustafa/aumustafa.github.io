@@ -1,6 +1,6 @@
 :root {
   /* Color — navy + off-white, warmed toward paper */
-  /* --bg-color: wheat; */
+  --bg-color: white;
   --text-color: #2a2420;
   --muted-color: #6b6258;
   --accent-color: #004488;
@@ -11,7 +11,7 @@
   /* Type */
   /* --body-font: 'IBM Plex Serif', Georgia, serif; */
   /* --body-font: 'Wittgenstein', Georgia, serif; */
-  --body-font: 'Inter', Georgia, sans-serif;
+  --body-font: 'Figtree', 'Helvetica Neue', 'Plus Jakarta Sans', 'Inter', sans-serif;
   --font-mono: 'IBM Plex Mono', 'Source Code Pro', monospace;
 }
 
@@ -21,9 +21,9 @@
   padding: 0;
 }
 
-/* html {
+html {
   background: var(--bg-color);
-} */
+}
 
 body {
   /* font-size: 1.125rem; */
@@ -71,6 +71,7 @@ body {
 }
 
 .container h1 {
+  font-weight: 500;
   font-size: 2.2rem;
   text-align: left;
   border-top: none;
@@ -175,7 +176,7 @@ p {
 }
 
 .sidebar-links a {
-  color: gray;
+  color: var(--accent-color);
   font-family: var(--body-font);
   /* font-size: 0.75rem; */
   text-decoration: none;
@@ -195,10 +196,10 @@ p {
 /* ---------------------------------------------------------
    Bio section
 --------------------------------------------------------- */
-/* .bio p { */
-  /* text-align: justify; */
-  /* hyphens: auto; */
-/* } */
+/* .bio p {
+  text-align: justify;
+  hyphens: manual;
+} */
 
 /* Link styling */
 a {
@@ -242,7 +243,7 @@ pre code {
    Swipeable Image Gallery & Dot Indicators
 --------------------------------------------------------- */
 .gallery {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .gallery-track {
@@ -345,9 +346,9 @@ h2 {
 .pub-thumb {
   flex: 0 0 auto;
   width: 220px;
-  height: 136px;
+  /* height: 136px; */
   object-fit: contain;
-  border: 1px solid var(--border-color);
+  /* border: 1px solid var(--border-color); */
 }
 
 .pub-info {
@@ -415,10 +416,6 @@ h2 {
     width: 100%;
     padding-top: 0;
   }
-
-  /* h1 { */
-    /* font-size: 2.4rem; */
-  /* } */
 }
 
 /* ---------------------------------------------------------
