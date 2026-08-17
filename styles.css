@@ -6,7 +6,7 @@
   --accent-color: #004488;
   --accent-deep: #00223f;
   --code-text: #002b66;
-  --code-bg: white;
+  --code-bg: GhostWhite;
   --border-color: Silver;
   /* --accent-color: #440088; */
   /* --accent-deep: #22003f; */
@@ -237,7 +237,7 @@ code {
   background: var(--code-bg);
   /* padding: 0.1em 0.35em; */
   /* border-radius: 3px; */
-  /* font-size: 0.95em; */
+  font-size: 0.95em;
 }
 
 pre {
