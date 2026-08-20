@@ -14,7 +14,8 @@
 
   /* Type */
   /* --body-font: 'IBM Plex Serif', Georgia, serif; */
-  --body-font: system-ui, sans-serif;
+  --body-font: 'Instrument Sans', system-ui, sans-serif;
+  --serif-font: 'Instrument Serif';
   --font-mono: 'IBM Plex Mono', monospace;
 }
 
@@ -163,7 +164,9 @@ body {
    Masthead (now lives in the sidebar)
 --------------------------------------------------------- */
 h1 {
-  font-size: 2rem;
+  font-family: var(--serif-font);
+  font-size: 2rem; /* Old with sans serif font */
+  font-size: 3rem; /* New with Instrument Serif */
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--accent-deep);
