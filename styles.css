@@ -37,6 +37,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+strong {
+  font-weight: 600;
+}
+
 /* ---------------------------------------------------------
    Page layout — sidebar + main content
    Desktop: two columns, side by side, scrolling together
@@ -167,9 +171,9 @@ body {
 h1 {
   font-family: var(--serif-font);
   font-size: 2rem; /* Old with sans serif font */
-  font-size: 3rem; /* New with Instrument Serif */
+  font-size: 2.95rem; /* New with Instrument Serif */
   font-weight: 500;
-  letter-spacing: -0.01em;
+  /* letter-spacing: -0.01em; */
   color: var(--accent-deep);
   /* border-top: 1px solid var(--text-color); */
   border-bottom: 3px double var(--border-color);
@@ -399,6 +403,7 @@ h2 {
   /* font-family: var(--font-mono); */
   font-size: 0.72rem;
   text-transform: uppercase;
+  font-stretch: expanded;
   letter-spacing: 0.05em;
   color: var(--muted-color);
   margin-bottom: 0;
