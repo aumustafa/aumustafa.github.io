@@ -38,7 +38,8 @@ body {
 }
 
 strong {
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--accent-deep);
 }
 
 /* ---------------------------------------------------------
@@ -401,10 +402,10 @@ h2 {
 
 .pub-venue {
   /* font-family: var(--font-mono); */
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  font-stretch: expanded;
-  letter-spacing: 0.05em;
+  font-stretch: semi-condensed;
+  letter-spacing: 0.1em;
   color: var(--muted-color);
   margin-bottom: 0;
 }
