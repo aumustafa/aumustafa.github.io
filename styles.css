@@ -25,10 +25,6 @@
   padding: 0;
 }
 
-html {
-  background: var(--bg-color);
-}
-
 body {
   font-family: var(--body-font);
   font-weight: 400;
@@ -38,8 +34,7 @@ body {
 }
 
 strong {
-  font-weight: 500;
-  color: var(--accent-deep);
+  font-weight: 600;
 }
 
 /* ---------------------------------------------------------
