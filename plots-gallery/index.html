@@ -44,7 +44,7 @@
         The package is very simple—it runs on top of matplotlib, and in most cases, importing matplotlib is not necessary. The standard use loop is calling <code>pub_style.use()</code> once to load the global style settings. Then, for every separate figure, <code>fig, ax = pub_style.new_figure()</code>, which gives a Figure for <code>fig</code> and either an Axes or an ndarray of Axes for <code>ax</code>, which are what you would use for matplotlib. After plotting your data, you can call <code>fig.savefig('figure')</code> (which by default saves files to PDFs; do <code>fig.savefig('figure.svg')</code> to save as an SVG) to export the figure.
       </p>
       <p>
-        There are also some helper functions. <code>pub_style.copy()</code> copies the figure as a PNG to the clipboard (macOS only), which is really handy for making presentations. <code>pub_style.griddify()</code> applies a stylized grid to a given set of Axes or to the current axis.
+        There are also some helper functions. <code>pub_style.copy()</code> copies the figure as a PNG to the clipboard (macOS only), which is really handy for making presentations. <code>pub_style.griddify()</code> applies a stylized grid to a given set of Axes or to the current axis. <code>pub_style.label_panels()</code> adds the little (a), (b), (c) labels multi-panel figures need—letters by default, but swap in your own if you'd rather have "Control"/"Treatment" or roman numerals. <code>colourbar</code> is a drop-in replacement for <code>fig.colorbar</code> but spelled properly and also stylized a little nicer.
       </p>
       <p>The package uses LaTeX by default, so mathematical symbols can be added most simply with LaTeX's math mode and Python's raw strings, such as <code>r"$y = \cos(x)$"</code>. The package also uses <a href="https://tol-colors.readthedocs.io/en/latest/" target="_blank" rel="noopener">Paul Tol's colour schemes</a> as they are print-friendly and colourblind-safe.</p>
       <p> Below is the full API reference (directly copied from the source code) and further below are some <a href="#example-plots">example creations</a>.</p>
@@ -117,6 +117,32 @@
         </ul>
       </div>
 
+      <div class="api-entry">
+        <h3><code>label_panels(axes, labels=None, loc='upper left', fmt='({})', fontsize=None, fontweight='normal', offset=6.0, **kwargs)</code></h3>
+        <p>Labels a set of panels (a), (b), (c), ... in their corner, inside the plotting area.</p>
+        <ul class="api-params">
+          <li><code>axes</code> — a single <code>Axes</code> or an ndarray of <code>Axes</code> (as returned by <code>new_figure()</code>). Flattened in row-major order, so labelling follows reading order for a grid of subplots.</li>
+          <li><code>labels</code> — the labels to use. If <code>None</code>, lowercase letters a, b, c, ... are used. If a string, treated as an explicit sequence of characters (e.g. <code>'ABCD'</code>). If a list, used as-is, letting you pass custom labels like <code>['i', 'ii', 'iii']</code> or <code>['Control', 'Treatment']</code>.</li>
+          <li><code>loc</code> — corner to place the label in: <code>'upper left'</code>, <code>'upper right'</code>, <code>'lower left'</code>, or <code>'lower right'</code>. Default <code>'upper left'</code>.</li>
+          <li><code>fmt</code> — format string wrapping each label, applied via <code>fmt.format(label)</code>. Default <code>'({})'</code>, giving "(a)", "(b)", etc. Use <code>'{}'</code> for bare letters, or <code>'{}.'</code> for "a.", "b.", etc.</li>
+          <li><code>fontsize</code> — font size of the labels. If <code>None</code>, defaults to <code>axes.titlesize</code>.</li>
+          <li><code>fontweight</code> — font weight of the labels. Default <code>'normal'</code>.</li>
+          <li><code>offset</code> — inset distance from the corner, in points. Default <code>6.0</code>.</li>
+        </ul>
+        <p>Extra kwargs are forwarded to <code>ax.annotate()</code>, e.g. <code>color</code> or <code>bbox</code> for a background patch behind the label.</p>
+      </div>
+
+      <div class="api-entry">
+        <h3><code>colourbar(mappable, ax=None, **kwargs)</code></h3>
+        <p>Creates a colour bar styled with short, outward, black ticks, regardless of the current axes tick style (e.g. despine). A thin wrapper around <code>fig.colorbar()</code> that keeps the colour bar's appearance consistent no matter what the surrounding axes' tick settings are.</p>
+        <ul class="api-params">
+          <li><code>mappable</code> — the image, contour set, or scatter collection the colour bar describes (anything <code>fig.colorbar()</code> accepts).</li>
+          <li><code>ax</code> — the axes to attach the colour bar to. If <code>None</code>, uses the current active axes.</li>
+        </ul>
+        <p>Extra kwargs are forwarded to <code>fig.colorbar()</code>, e.g. <code>label</code>, <code>shrink</code>, <code>orientation</code>.</p>
+        <p class="api-returns">The created colour bar object.</p>
+      </div>
+
     </section>
 
     <h2 id="example-plots">Example Plots</h2>
@@ -161,6 +187,7 @@
     addPlot('Laser Reaching Saturation', 'laserAtThreshold.pdf', 'laserAtThreshold.svg', 'laserAtThreshold.py');
     addPlot('Scientificish Plot', 'regresfigure.pdf', 'regresfigure.svg', 'regresfigure.py');
     addPlot('A KDE Plot From Seaborn', 'penguins_kde.pdf', 'penguins_kde.svg', 'seapub2.py');
+    addPlot('Some Hydrogen Wavefunctions', 'wavefuncs.pdf', 'wavefuncs.svg', 'wavefuncs.py');
   </script>
 </body>
 
