@@ -206,6 +206,8 @@ p {
 .sidebar-links a:hover {
   color: var(--accent-color);
   text-decoration: underline;
+  text-decoration-thickness: 0.5px;
+  text-underline-offset: 1px;
 }
 
 .sidebar-links-sep {
@@ -397,11 +399,11 @@ h2 {
 
 .pub-venue {
   /* font-family: var(--font-mono); */
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  font-stretch: semi-condensed;
-  letter-spacing: 0.1em;
-  color: var(--muted-color);
+  font-size: 0.85rem;
+  /* text-transform: uppercase; */
+  /* font-stretch: semi-condensed; */
+  /* letter-spacing: 0.1em; */
+  /* color: var(--muted-color); */
   margin-bottom: 0;
 }
 
