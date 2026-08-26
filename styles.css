@@ -289,6 +289,7 @@ pre code {
   flex: 0 0 100%;
   scroll-snap-align: center;
   width: 100%;
+  max-width: 500px; /* So if the screen is bigger than this and still in mobile mode, my face isn't massive. */
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 4px;
@@ -408,7 +409,7 @@ h2 {
 }
 
 /* Stack thumbnail above text on narrow screens */
-@media (max-width: 480px) {
+@media (max-width: 900px) {
   .pub-item {
     flex-direction: column;
   }
