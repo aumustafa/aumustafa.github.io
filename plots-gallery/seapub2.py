@@ -10,10 +10,10 @@ df = sns.load_dataset("penguins").dropna()
 x = df["body_mass_g"].values
 y = df["bill_depth_mm"].values
 
-fig, ax = pub_style.new_figure(ratio=1.0)
+fig, ax = pub_style.new_figure()
 
 xmin, xmax = 2200, 6800
-ymin, ymax = 10, 25
+ymin, ymax = 12, 22
 xx, yy = np.mgrid[xmin:xmax:200j, ymin:ymax:200j]
 kernel = gaussian_kde(np.vstack([x, y]))
 zz = kernel(np.vstack([xx.ravel(), yy.ravel()])).reshape(xx.shape)
@@ -38,5 +38,5 @@ ax.set_ylim(ymin, ymax)
 ax.set_xlabel("Body mass (g)")
 ax.set_ylabel("Bill depth (mm)")
 
-fig.savefig("plots-gallery/penguins_kde.svg")
+fig.savefig("plots-gallery/penguins_kde")
 # pub_style.show()
