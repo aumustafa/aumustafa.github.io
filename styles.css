@@ -243,7 +243,7 @@ code {
   background: var(--code-bg);
   /* padding: 0.1em 0.35em; */
   /* border-radius: 3px; */
-  font-size: 0.9em;
+  font-size: 0.98em;
 }
 
 pre {
@@ -433,7 +433,8 @@ h2 {
 
 .api-entry {
   /* padding: 0 0 1.5rem 1rem; */
-  margin-bottom: 1.5rem;
+  /* padding-left: 1rem; */
+  margin-bottom: 2rem;
   /* border-left: 1px solid var(--border-color); */
 }
 
