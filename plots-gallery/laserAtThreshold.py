@@ -7,8 +7,9 @@ q_sat = 1e10
 
 q = 0.5 * q_sat * (y - 1) + 0.5 * q_sat * np.sqrt((y - 1) ** 2 + 4 * y / q_sat)
 
-pub_style.use(serif=True)
+pub_style.use(serif=True) # Serif uses newtxtext/newtxmath (Times)
 fig, ax = pub_style.new_figure(despine=False, minor_ticks=True)
+# despine=False has all four spines, and minor_ticks gets you smaller ticks between the bigger ones
 
 ax.set_xlabel(r'$g_0 / g_t$')
 ax.set_ylabel(r'$\log\bar{q}_\nu$')
