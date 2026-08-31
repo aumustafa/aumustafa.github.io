@@ -34,16 +34,17 @@ for i, (angle, time) in enumerate(files.items()):
     intensity_matrix[:, i] = (counts - dark) / time
 
 
-pub_style.use(serif=True, custom_preamble=r'\usepackage{fouriernc}', colours='rainbow_PuRd_r', N=len(files))
-fig, ax = pub_style.new_figure(despine=True, minor_ticks=True)
+# cmbright is a sans-serif font, but if it were a serif font,
+# then I would have to do serif=True
+pub_style.use(colours='rainbow_PuRd_r', N=len(files))
+fig, ax = pub_style.new_figure()
 
+mask = (wavelengths >= 400) & (wavelengths <= 1000)
 for i, angle in enumerate(files.keys()):
-    ax.semilogy(wavelengths, intensity_matrix[:, i], label=f'{angle}')
+    ax.semilogy(wavelengths[mask], intensity_matrix[mask, i], label=f'{angle}')
 
-ax.set_xlim(400, 1000)
-ax.set_ylim(1e-2, 2e4)
 ax.set_xlabel('Wavelength (nm)')
-ax.set_ylabel('Intensity')
+ax.set_ylabel(r'$I_\text{corr}$ (\unit{\watt\per\square\centi\metre\per\milli\second})')
 ax.set_title('Nd Wheel Calibration')
 
 fig.savefig('plots-gallery/rainbow')

@@ -41,7 +41,7 @@
         meaning of "plots cooked up pub style", so that's the canon now.
       </p>
       <p>
-        The package is very simple—it runs on top of matplotlib, and in most cases, importing matplotlib is not necessary. The standard use loop is calling <code>pub_style.use()</code> once to load the global style settings. Then, for every separate figure, <code>fig, ax = pub_style.new_figure()</code>, which gives a Figure for <code>fig</code> and either an Axes or an ndarray of Axes for <code>ax</code>, which are what you would use for matplotlib. After plotting your data, you can call <code>fig.savefig('figure')</code> (which by default saves files to PDFs; do <code>fig.savefig('figure.svg')</code> to save as an SVG) to export the figure.
+        The package is very simple—it runs on top of matplotlib, and in most cases, importing matplotlib is not necessary. The standard use loop is calling <code>pub_style.use()</code> once to load the global style settings. Then, for every separate figure, <code>fig, ax = pub_style.new_figure()</code>, which gives a Figure for <code>fig</code> and either an Axes or an ndarray of Axes for <code>ax</code>, which are what you would use for matplotlib. After plotting your data, you can call <code>fig.savefig('figure')</code> (which by default saves files to PDFs; do <code>fig.savefig('figure.svg')</code> to save as an SVG) to export the figure, or call <code>pub_style.show()</code>
       </p>
       <p>
         There are also some helper functions. <code>pub_style.copy()</code> copies the figure as a PNG to the clipboard (macOS only), which is really handy for making presentations. <code>pub_style.griddify()</code> applies a stylized grid to a given set of Axes or to the current axis. <code>pub_style.label_panels()</code> adds the little (a), (b), (c) labels multi-panel figures need—letters by default, but swap in your own if you'd rather have "Control"/"Treatment" or roman numerals. <code>colourbar</code> is a drop-in replacement for <code>fig.colorbar</code> but spelled properly and also stylized a little nicer.
@@ -189,7 +189,7 @@
     addPlot('Laser Reaching Saturation', 'laserAtThreshold.pdf', 'laserAtThreshold.svg', 'laserAtThreshold.py');
     addPlot('A KDE Plot from the Penguins Dataset', 'penguins_kde.pdf', 'penguins_kde.svg', 'seapub2.py');
     addPlot('Scatter Plot with Regression', 'regresfigure.pdf', 'regresfigure.svg', 'regresfigure.py');
-    addPlot('Colours sampled from a colourmap; custom LaTeX font', 'rainbow.pdf', 'rainbow.svg', 'rainbow.py');
+    addPlot('Colours sampled from a colourmap', 'rainbow.pdf', 'rainbow.svg', 'rainbow.py');
     addPlot('Some Hydrogen Waveflowers', 'wavefuncs.pdf', 'wavefuncs.svg', 'wavefuncs.py');
   </script>
 </body>
