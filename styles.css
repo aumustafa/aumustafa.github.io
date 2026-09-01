@@ -260,6 +260,8 @@ pre code {
   background: transparent;
   color: inherit;
   padding: 0;
+  font-size: 0.9em;
+  line-height: normal; /* override the 1 from `code`, since pre needs breathing room across lines */
 }
 
 /* ---------------------------------------------------------
@@ -363,10 +365,6 @@ h2 {
   padding-bottom: 0;
 }
 
-.pub-item:hover {
-  transform: translateX(2px);
-}
-
 .pub-thumb {
   flex: 0 0 auto;
   width: 220px;
@@ -389,14 +387,17 @@ h2 {
   transition: color 0.15s ease;
 }
 
-.pub-item:hover .pub-title {
-  color: var(--accent-color);
-}
-
 .pub-authors {
-  color: var(--text-color);
   font-size: 0.95rem;
   margin-bottom: 0.2rem;
+}
+
+.pub-item:hover {
+  transform: translateX(5px);
+}
+
+.pub-item:hover .pub-title {
+  color: var(--accent-color);
 }
 
 .pub-venue {
