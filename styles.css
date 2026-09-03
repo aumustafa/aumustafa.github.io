@@ -351,7 +351,7 @@ h2 {
   color: inherit;
   padding: 1rem 0;
   border-bottom: 1px solid var(--border-color);
-  transition: transform 0.15s ease;
+  /* transition: transform 0.15s ease; */
 }
 
 .pub-list .pub-item:first-child {
@@ -390,15 +390,6 @@ h2 {
   margin-bottom: 0.2rem;
 }
 
-.pub-item:hover {
-  transform: translateX(5px);
-  color: var(--text-color);
-}
-
-.pub-item:hover .pub-title {
-  color: var(--accent-color);
-}
-
 .pub-venue {
   /* font-family: var(--font-mono); */
   font-size: 0.8rem;
@@ -407,6 +398,15 @@ h2 {
   letter-spacing: 0.05em;
   color: var(--muted-color);
   margin-bottom: 0;
+}
+
+.pub-item:hover {
+  /* transform: translateX(5px); */
+  color: var(--accent-color);
+}
+
+.pub-item:hover .pub-title {
+  color: var(--accent-color);
 }
 
 /* Stack thumbnail above text on narrow screens */
