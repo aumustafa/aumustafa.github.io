@@ -204,7 +204,7 @@ p {
 }
 
 .sidebar-links a:hover {
-  color: var(--accent-color);
+  /* color: var(--accent-color); */
   text-decoration: underline;
   text-decoration-thickness: 0.5px;
   text-underline-offset: 1px;
@@ -322,14 +322,12 @@ pre code {
   transform: scale(1.3);
 }
 
-/* ---------------------------------------------------------
-   Talks & Publications — set as a numbered bibliography
---------------------------------------------------------- */
 .publications {
   margin-top: 0.5rem;
 }
 
 h2 {
+  /* font-family: var(--serif-font); */
   font-size: 1.3rem;
   font-weight: 400;
   font-style: italic;
@@ -380,7 +378,7 @@ h2 {
 
 .pub-title {
   /* font-style: italic; */
-  color: var(--accent-deep);
+  /* color: var(--accent-deep); */
   /* font-size: 1.08rem; */
   /* line-height: 1.4; */
   margin-bottom: 0.3rem;
@@ -394,6 +392,7 @@ h2 {
 
 .pub-item:hover {
   transform: translateX(5px);
+  color: var(--text-color);
 }
 
 .pub-item:hover .pub-title {
@@ -402,11 +401,11 @@ h2 {
 
 .pub-venue {
   /* font-family: var(--font-mono); */
-  font-size: 0.85rem;
-  /* text-transform: uppercase; */
-  /* font-stretch: semi-condensed; */
-  /* letter-spacing: 0.1em; */
-  /* color: var(--muted-color); */
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-stretch: semi-condensed;
+  letter-spacing: 0.05em;
+  color: var(--muted-color);
   margin-bottom: 0;
 }
 
