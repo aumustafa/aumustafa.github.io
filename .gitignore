@@ -1,0 +1,22 @@
+# LaTeX auxiliary/junk files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.nav
+*.snm
+*.vrb
+*.xdv
+*.figlist
+*.makefile
+*.fdb_latexmk
+*.auxlock
