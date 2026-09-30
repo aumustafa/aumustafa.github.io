@@ -8,12 +8,8 @@
   --code-text: #002b66;
   --code-bg: GhostWhite;
   --border-color: Silver;
-  /* --accent-color: #440088; */
-  /* --accent-deep: #22003f; */
-  /* --code-text: #2b0066; */
 
   /* Type */
-  /* --body-font: 'IBM Plex Serif', Georgia, serif; */
   --body-font: 'Instrument Sans', system-ui, sans-serif;
   --serif-font: 'Instrument Serif';
   --font-mono: 'IBM Plex Mono', monospace;
@@ -29,7 +25,6 @@ body {
   font-family: var(--body-font);
   font-weight: 400;
   color: var(--text-color);
-  /* background: var(--bg-color); */
   -webkit-font-smoothing: antialiased;
 }
 
@@ -88,9 +83,7 @@ strong {
 }
 
 .container h1 {
-  /* font-weight: 500; */
-  font-size: 2.2rem;
-  font-size: 3rem; /* Using Instrument Serif Font */
+  font-size: 3rem; /* Instrument Serif */
   text-align: left;
   border-top: none;
 }
@@ -166,16 +159,11 @@ strong {
 --------------------------------------------------------- */
 h1 {
   font-family: var(--serif-font);
-  font-size: 2rem; /* Old with sans serif font */
-  font-size: 2.95rem; /* New with Instrument Serif */
-  font-weight: 500;
-  /* letter-spacing: -0.01em; */
+  font-size: 2.95rem;
+  font-weight: 400;
   color: var(--accent-deep);
-  /* border-top: 1px solid var(--text-color); */
   border-bottom: 3px double var(--border-color);
-  /* padding: 0.6rem 0 0.6rem; */
   padding: 0 0 0.6rem;
-  /* text-align: center; */
   margin-bottom: 1.25rem;
   line-height: 1.25;
 }
@@ -198,13 +186,11 @@ p {
 .sidebar-links a {
   color: var(--accent-color);
   font-family: var(--body-font);
-  /* font-size: 0.75rem; */
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 .sidebar-links a:hover {
-  /* color: var(--accent-color); */
   text-decoration: underline;
   text-decoration-thickness: 0.5px;
   text-underline-offset: 1px;
@@ -214,14 +200,6 @@ p {
   color: var(--muted-color);
   font-size: 1rem;
 }
-
-/* ---------------------------------------------------------
-   Bio section
---------------------------------------------------------- */
-/* .bio p {
-  text-align: justify;
-  hyphens: manual;
-} */
 
 /* Link styling */
 a {
@@ -242,16 +220,12 @@ code {
   color: var(--code-text);
   background: var(--code-bg);
   line-height: 1;
-  /* padding: 0.1em 0.35em; */
-  /* border-radius: 3px; */
   font-size: 0.98em;
 }
 
 pre {
   background: var(--code-bg);
   color: var(--code-text);
-  /* padding: 1rem 1.25rem; */
-  /* border-radius: 6px; */
   overflow-x: auto;
   border: 1px solid var(--border-color);
 }
@@ -292,7 +266,7 @@ pre code {
   flex: 0 0 100%;
   scroll-snap-align: center;
   width: 100%;
-  max-width: 500px; /* So if the screen is bigger than this and still in mobile mode, my face isn't massive. */
+  max-width: 500px; /* keeps portrait from getting huge on wide "mobile" viewports */
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 4px;
@@ -327,7 +301,6 @@ pre code {
 }
 
 h2 {
-  /* font-family: var(--serif-font); */
   font-size: 1.3rem;
   font-weight: 400;
   font-style: italic;
@@ -351,7 +324,6 @@ h2 {
   color: inherit;
   padding: 1rem 0;
   border-bottom: 1px solid var(--border-color);
-  /* transition: transform 0.15s ease; */
 }
 
 .pub-list .pub-item:first-child {
@@ -366,9 +338,7 @@ h2 {
 .pub-thumb {
   flex: 0 0 auto;
   width: 220px;
-  /* height: 136px; */
   object-fit: contain;
-  /* border: 1px solid var(--border-color); */
 }
 
 .pub-info {
@@ -391,7 +361,6 @@ h2 {
 }
 
 .pub-venue {
-  /* font-family: var(--font-mono); */
   font-size: 0.8rem;
   text-transform: uppercase;
   font-stretch: semi-condensed;
@@ -401,7 +370,6 @@ h2 {
 }
 
 .pub-item:hover {
-  /* transform: translateX(5px); */
   color: var(--accent-color);
 }
 
@@ -433,10 +401,7 @@ h2 {
 }
 
 .api-entry {
-  /* padding: 0 0 1.5rem 1rem; */
-  /* padding-left: 1rem; */
   margin-bottom: 2rem;
-  /* border-left: 1px solid var(--border-color); */
 }
 
 .api-entry:last-child {
