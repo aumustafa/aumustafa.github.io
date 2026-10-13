@@ -367,9 +367,9 @@ h2 {
 
 .pub-venue {
   font-size: 0.8rem;
-  text-transform: uppercase;
-  font-stretch: semi-condensed;
-  letter-spacing: 0.05em;
+  /* text-transform: uppercase; */
+  /* font-stretch: semi-condensed; */
+  /* letter-spacing: 0.05em; */
   color: var(--muted-color);
   margin-bottom: 0;
 }
