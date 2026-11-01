@@ -83,7 +83,7 @@ strong {
 }
 
 .container h1 {
-  font-size: 3rem; /* Instrument Serif */
+  /* font-size: 3rem; /* Instrument Serif */
   text-align: left;
   border-top: none;
 }
@@ -158,8 +158,8 @@ strong {
    Masthead (now lives in the sidebar)
 --------------------------------------------------------- */
 h1 {
-  font-family: var(--serif-font);
-  font-size: 2.95rem;
+  /* font-family: var(--serif-font); */
+  /* font-size: 2.95rem; */
   font-weight: 400;
   color: var(--accent-deep);
   border-bottom: 3px double var(--border-color);
