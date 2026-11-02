@@ -10,8 +10,8 @@
   --border-color: Silver;
 
   /* Type */
-  --body-font: 'Instrument Sans', system-ui, sans-serif;
-  --serif-font: 'Instrument Serif';
+  --body-font: system-ui, sans-serif;
+  /* --serif-font: 'Instrument Serif'; */
   --font-mono: 'IBM Plex Mono', monospace;
 }
 
@@ -160,6 +160,7 @@ strong {
 h1 {
   /* font-family: var(--serif-font); */
   /* font-size: 2.95rem; */
+  font-stretch: expanded;
   font-weight: 400;
   color: var(--accent-deep);
   border-bottom: 3px double var(--border-color);
@@ -368,7 +369,7 @@ h2 {
 .pub-venue {
   font-size: 0.8rem;
   /* text-transform: uppercase; */
-  /* font-stretch: semi-condensed; */
+  font-stretch: semi-condensed;
   /* letter-spacing: 0.05em; */
   color: var(--muted-color);
   margin-bottom: 0;
