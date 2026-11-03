@@ -12,7 +12,7 @@
   /* Type */
   --body-font: system-ui, sans-serif;
   /* --serif-font: 'Instrument Serif'; */
-  --font-mono: 'IBM Plex Mono', monospace;
+  --font-mono: 'Lilex', ui-monospace, 'SF Mono', monospace;
 }
 
 * {
@@ -159,7 +159,8 @@ strong {
 --------------------------------------------------------- */
 h1 {
   /* font-family: var(--serif-font); */
-  /* font-size: 2.95rem; */
+  /* font-size: 2.95rem; This was for Instrument Serif */
+  /* font-size: 2rem; */
   font-stretch: expanded;
   font-weight: 400;
   color: var(--accent-deep);
@@ -221,10 +222,12 @@ code {
   color: var(--code-text);
   background: var(--code-bg);
   line-height: 1;
-  font-size: 0.98em;
+  font-size: 0.9em;
 }
 
 pre {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
   background: var(--code-bg);
   color: var(--code-text);
   overflow-x: auto;
@@ -235,7 +238,7 @@ pre code {
   background: transparent;
   color: inherit;
   padding: 0;
-  font-size: 0.9em;
+  font-size: inherit;
   line-height: normal; /* override the 1 from `code`, since pre needs breathing room across lines */
 }
 
