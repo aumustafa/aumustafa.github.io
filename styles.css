@@ -1,6 +1,4 @@
 :root {
-  /* Color — navy + off-white, warmed toward paper */
-  --bg-color: white;
   --text-color: #2a2420;
   --muted-color: #6b6258;
   --accent-color: #004488;
@@ -8,6 +6,10 @@
   --code-text: #002b66;
   --code-bg: GhostWhite;
   --border-color: Silver;
+  /* Purple variants */
+  /* --accent-color: #5a2d91; */
+  /* --accent-deep: #2a1245; */
+  /* --code-text: #3b1a73; */
 
   /* Type */
   --body-font: system-ui, sans-serif;
@@ -84,6 +86,7 @@ strong {
 
 .container h1 {
   /* font-size: 3rem; /* Instrument Serif */
+  font-size: 2rem;
   text-align: left;
   border-top: none;
 }
@@ -160,8 +163,9 @@ strong {
 h1 {
   /* font-family: var(--serif-font); */
   /* font-size: 2.95rem; This was for Instrument Serif */
-  /* font-size: 2rem; */
+  font-size: 1.95rem;
   font-stretch: expanded;
+  /* white-space: nowrap; */
   font-weight: 400;
   color: var(--accent-deep);
   border-bottom: 3px double var(--border-color);
