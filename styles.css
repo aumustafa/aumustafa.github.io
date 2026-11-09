@@ -14,7 +14,7 @@
   /* Type */
   --body-font: system-ui, sans-serif;
   /* --serif-font: 'Instrument Serif'; */
-  --font-mono: 'Lilex', ui-monospace, 'SF Mono', monospace;
+  --font-mono: 'SF Mono', 'Lilex', ui-monospace, monospace;
 }
 
 * {
@@ -226,7 +226,7 @@ code {
   color: var(--code-text);
   background: var(--code-bg);
   /* line-height: 1; */
-  font-size: 0.95em;
+  /* font-size: 0.95em; */
 }
 
 pre {
@@ -376,6 +376,7 @@ h2 {
 .pub-venue {
   font-size: 0.8rem;
   /* text-transform: uppercase; */
+  /* font-stretch: semi-condensed; */
   font-stretch: semi-condensed;
   /* letter-spacing: 0.05em; */
   color: var(--muted-color);
