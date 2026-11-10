@@ -45,7 +45,7 @@ strong {
   gap: 3rem;
   max-width: 990px;
   margin: 0 auto;
-  padding: 3rem 1.5rem 3rem;
+  padding: 3rem 1.5rem 1rem; /* Was 3rem before */
 }
 
 .sidebar {
