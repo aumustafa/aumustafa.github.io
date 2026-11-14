@@ -1,0 +1,39 @@
+/**
+* @license
+*
+* Font Family: Sentient
+* Designed by: Noopur Choksi
+* URL: https://www.fontshare.com/fonts/sentient
+* © 2026 Indian Type Foundry
+*
+* Sentient Extralight 
+* Sentient ExtralightItalic 
+* Sentient Light 
+* Sentient LightItalic 
+* Sentient Regular 
+* Sentient Italic 
+* Sentient Medium 
+* Sentient MediumItalic 
+* Sentient Bold 
+* Sentient BoldItalic 
+* Sentient Variable (Variable font)
+* Sentient VariableItalic (Variable font)
+
+*
+*/
+
+@font-face {
+  font-family: 'Sentient';
+  src: url('fonts/Sentient-Variable.woff2') format('woff2');
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sentient';
+  src: url('fonts/Sentient-VariableItalic.woff2') format('woff2');
+  font-weight: 200 700;
+  font-style: italic;
+  font-display: swap;
+}

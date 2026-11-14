@@ -1,3 +1,6 @@
+@import url("sentient.css");
+@import url("satoshi.css");
+
 :root {
   --text-color: #2a2420;
   --muted-color: #6b6258;
@@ -12,9 +15,9 @@
   /* --code-text: #3b1a73; */
 
   /* Type */
-  --body-font: system-ui, sans-serif;
+  --body-font: 'Sentient', system-ui, sans-serif;
   /* --serif-font: 'Instrument Serif'; */
-  --font-mono: 'SF Mono', 'Lilex', ui-monospace, monospace;
+  --font-mono: 'Lilex', 'SF Mono', ui-monospace, monospace;
 }
 
 * {
@@ -28,6 +31,7 @@ body {
   font-weight: 400;
   color: var(--text-color);
   -webkit-font-smoothing: antialiased;
+  line-height: 1.25;
 }
 
 strong {
