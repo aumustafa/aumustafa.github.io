@@ -16,9 +16,17 @@
       display: flex;
       flex-wrap: wrap;
       gap: 1.25rem 2rem;
+      justify-content: center;
       align-items: flex-end;
       margin-bottom: 1.25rem;
     }
+
+    .control { text-align: center; }
+
+    .options { align-items: center; margin-top: 1rem; margin-bottom: 0; }
+    .check { display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+    .check input { accent-color: var(--accent-color); }
+    select:disabled { opacity: 0.5; }
 
     .control label {
       display: block;
@@ -26,6 +34,7 @@
     }
 
     .control select,
+    .cmap-select,
     .control input[type="range"] {
       font-family: var(--body-font);
       font-size: inherit;
@@ -33,7 +42,8 @@
       accent-color: var(--accent-color);
     }
 
-    .control select {
+    .control select,
+    .cmap-select {
       background: var(--code-bg);
       border: 1px solid var(--border-color);
       border-radius: 2px;
@@ -98,7 +108,7 @@
         <select id="selM"></select>
       </div>
       <div class="control">
-        <label for="rngExtent">Half-width: <span id="extentVal"></span><i>a</i><sub>0</sub></label>
+        <label for="rngExtent">Half-width: <span id="extentVal"></span> <i>a</i><sub>0</sub></label>
         <input type="range" id="rngExtent" min="2" max="80" step="1" />
       </div>
     </section>
@@ -106,6 +116,16 @@
     <div class="figure-title" id="figTitle"></div>
     <canvas id="plot"></canvas>
     <p class="caption" id="caption"></p>
+
+    <section class="controls options">
+      <label class="check"><input type="checkbox" id="chkMap" checked> Colour map</label>
+      <select id="selCmap" aria-label="Colour map" class="cmap-select">
+        <option value="WhOrBr">WhOrBr</option>
+        <option value="iridescent">iridescent</option>
+        <option value="rainbow">rainbow</option>
+      </select>
+      <label class="check"><input type="checkbox" id="chkCont"> Contour lines</label>
+    </section>
   </main>
 
   <script>
@@ -157,23 +177,31 @@
       };
     }
 
-    // ---------- Colour map: tol_colors.rainbow sampled at 17 stops ----------
-    const STOPS = ['#e8ecfb', '#d0bfe0', '#b38cc0', '#985ea4', '#6b509f', '#536ebd', '#4d8fc2', '#56a1ae', '#65ae96', '#84ba70', '#b7bd4c', '#daac3d', '#e78e36', '#e4652d', '#da2222', '#93211b', '#521a13']
-      .map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
-    function cmap(t) {
-      const s = Math.min(Math.max(t, 0), 1) * (STOPS.length - 1);
-      const i = Math.min(Math.floor(s), STOPS.length - 2), f = s - i;
-      return STOPS[i].map((c, k) => c + (STOPS[i + 1][k] - c) * f);
+    // ---------- Colour maps (sampled from Paul Tol's tol_colors, 33 stops each) ----------
+    const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+    const CMAPS = {
+      WhOrBr: ["#ffffff", "#fffdee", "#fffbdd", "#fff9cd", "#fff7bc", "#fff2b1", "#feeda6", "#fee89b", "#fee390", "#fedb80", "#fed36f", "#fecb5f", "#fec44f", "#fdb945", "#fcae3b", "#fca432", "#fb9929", "#f78f23", "#f3841e", "#ef7a19", "#eb6f14", "#e3660f", "#db5d0b", "#d35406", "#cb4b02", "#be4503", "#b13f03", "#a43904", "#983404", "#8b3005", "#7e2c05", "#712806", "#662506"],
+      iridescent: ["#fefbe9", "#fdf8db", "#f9f5cd", "#f4f3c0", "#edf1b8", "#e4eeba", "#dbebc1", "#d2e8c8", "#c9e5ce", "#bfe2d3", "#b6ded7", "#addada", "#a4d6dd", "#9bd2e1", "#92cde3", "#89c9e5", "#81c4e7", "#7dbee7", "#7cb8e6", "#7fb1e3", "#86a8de", "#8d9fd8", "#9495cf", "#9a8cc6", "#9c83ba", "#9c7aad", "#9a719f", "#946890", "#8b5f80", "#805770", "#6f4d5e", "#5b414c", "#46353a"],
+      rainbow: ["#e8ecfb", "#ddd7ef", "#d0bfe0", "#c2a5cf", "#b38cc0", "#a574b2", "#985ea4", "#854e99", "#6b509f", "#5d5eae", "#536ebd", "#4e80c5", "#4d8fc2", "#519ab8", "#56a1ae", "#5da8a3", "#65ae96", "#71b585", "#84ba70", "#9dbd5b", "#b7bd4c", "#ccb743", "#daac3d", "#e39f3a", "#e78e36", "#e67b32", "#e4652d", "#df4928", "#da2222", "#b7221e", "#93211b", "#6f1e17", "#521a13"]
+    };
+    for (const k in CMAPS) CMAPS[k] = CMAPS[k].map(hex);
+    function cmap(name, t) {
+      const st = CMAPS[name];
+      const s = Math.min(Math.max(t, 0), 1) * (st.length - 1);
+      const i = Math.min(Math.floor(s), st.length - 2), f = s - i;
+      return st[i].map((c, k) => c + (st[i + 1][k] - c) * f);
     }
 
     // ---------- UI ----------
     const $ = id => document.getElementById(id);
     const selN = $('selN'), selL = $('selL'), selM = $('selM'), rng = $('rngExtent');
+    const chkMap = $('chkMap'), selCmap = $('selCmap'), chkCont = $('chkCont');
     const canvas = $('plot'), ctx = canvas.getContext('2d');
     const LETTERS = 'spdfghik';
     const GRID = 300;
     const off = document.createElement('canvas');
     off.width = off.height = GRID;
+    let vals = new Float64Array(GRID * GRID), vmax = 0, curE = 30;
 
     function fill(sel, values, current, fmt) {
       sel.innerHTML = '';
@@ -206,49 +234,105 @@
       return { step: mant * p, minor: mant * p / (mant === 2 ? 4 : 5) };
     }
 
-    function draw() {
-      const n = +selN.value, l = +selL.value, m = +selM.value, E = +rng.value;
-      $('extentVal').textContent = E;
-      $('figTitle').innerHTML =
-        `<i>&psi;</i><sub>${n}${l}${m}</sub> = <i>R</i><sub>${n}${l}</sub><i>Y</i><sub>${l}${m}</sub>`;
-      $('caption').innerHTML =
-        `${n}${LETTERS[l] || ''} orbital, <i>m</i> = ${m} &middot; ${n - l - 1} radial node${n - l - 1 === 1 ? '' : 's'}, ${l} angular node${l === 1 ? '' : 's'}`;
+    // Marching-squares segments: corners a(TL) b(TR) c(BR) d(BL); edges t, r, bt, l
+    const SEG = {
+      1: [['l', 'bt']], 2: [['bt', 'r']], 3: [['l', 'r']], 4: [['t', 'r']],
+      5: [['l', 't'], ['bt', 'r']], 6: [['t', 'bt']], 7: [['l', 't']], 8: [['t', 'l']],
+      9: [['t', 'bt']], 10: [['t', 'r'], ['l', 'bt']], 11: [['t', 'r']], 12: [['l', 'r']],
+      13: [['bt', 'r']], 14: [['l', 'bt']]
+    };
+    function contourPath(L, X, Y) {
+      ctx.beginPath();
+      for (let j = 0; j < GRID - 1; j++) {
+        for (let i = 0; i < GRID - 1; i++) {
+          const a = vals[j * GRID + i], b = vals[j * GRID + i + 1];
+          const c = vals[(j + 1) * GRID + i + 1], d = vals[(j + 1) * GRID + i];
+          const idx = (a > L ? 8 : 0) | (b > L ? 4 : 0) | (c > L ? 2 : 0) | (d > L ? 1 : 0);
+          if (idx === 0 || idx === 15) continue;
+          const pt = e => e === 't' ? [i + (L - a) / (b - a), j]
+            : e === 'r' ? [i + 1, j + (L - b) / (c - b)]
+            : e === 'bt' ? [i + (L - d) / (c - d), j + 1]
+            : [i, j + (L - a) / (d - a)];
+          for (const [p, q] of SEG[idx]) {
+            const P = pt(p), Q = pt(q);
+            ctx.moveTo(X(P[0]), Y(P[1])); ctx.lineTo(X(Q[0]), Y(Q[1]));
+          }
+        }
+      }
+      ctx.stroke();
+    }
 
-      // Density -> offscreen image (row 0 = top = +z)
+    // Recompute |psi|^2 on the grid (row 0 = top = +z)
+    function compute() {
+      const n = +selN.value, l = +selL.value, m = +selM.value, E = +rng.value;
+      curE = E;
+      $('extentVal').textContent = E;
+    //   $('figTitle').innerHTML =
+        // `<i>&psi;</i><sub>${n}${l}${m}</sub> = <i>R</i><sub>${n}${l}</sub><i>Y</i><sub>${l}${m}</sub>`;
+      $('caption').innerHTML =
+        `${n}${LETTERS[l] || ''} orbital, <i>m</i> = ${m}; ${n - l - 1} radial node${n - l - 1 === 1 ? '' : 's'}, ${l} angular node${l === 1 ? '' : 's'}`;
       const dens = makeDensity(n, l, m);
-      const vals = new Float64Array(GRID * GRID);
-      let max = 0;
+      vmax = 0;
       for (let j = 0; j < GRID; j++) {
         const z = E - (2 * E) * (j + 0.5) / GRID;
         for (let i = 0; i < GRID; i++) {
           const x = -E + (2 * E) * (i + 0.5) / GRID;
           const v = dens(x, z);
           vals[j * GRID + i] = v;
-          if (v > max) max = v;
+          if (v > vmax) vmax = v;
         }
       }
-      const img = off.getContext('2d').createImageData(GRID, GRID);
-      for (let k = 0; k < vals.length; k++) {
-        const c = cmap(max > 0 ? vals[k] / max : 0);
-        img.data[4 * k] = c[0]; img.data[4 * k + 1] = c[1]; img.data[4 * k + 2] = c[2]; img.data[4 * k + 3] = 255;
-      }
-      off.getContext('2d').putImageData(img, 0, 0);
+    }
 
-      // Canvas layout
+    function render() {
+      const E = curE, name = selCmap.value, showMap = chkMap.checked;
       const dpr = window.devicePixelRatio || 1;
       const W = canvas.clientWidth;
-      const ml = 58, mr = 12, mt = 10, mb = 50;
+      const cs = getComputedStyle(document.body);
+      const font = cs.fontFamily, txt = cs.color, fs = parseFloat(cs.fontSize);
+      // pub_style proportions (8 pt font): major tick 3.5, minor 2.0, pad 3.5, widths 0.5 / 0.4
+      const tMaj = fs * 0.4375, tMin = fs * 0.25, pad = fs * 0.4375;
+      const wMaj = fs * 0.0625, wMin = fs * 0.05;
+      const ml = 62, mr = 12, mt = 10, mb = 52;
       const S = W - ml - mr, H = S + mt + mb;
       canvas.style.height = H + 'px';
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
 
-      ctx.imageSmoothingEnabled = true;
-      ctx.drawImage(off, ml, mt, S, S);
+      // Colour map (or white background)
+      if (showMap) {
+        const octx = off.getContext('2d');
+        const img = octx.createImageData(GRID, GRID);
+        for (let k = 0; k < vals.length; k++) {
+          const c = cmap(name, vmax > 0 ? vals[k] / vmax : 0);
+          img.data[4 * k] = c[0]; img.data[4 * k + 1] = c[1]; img.data[4 * k + 2] = c[2]; img.data[4 * k + 3] = 255;
+        }
+        octx.putImageData(img, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(off, ml, mt, S, S);
+      } else {
+        ctx.fillStyle = '#fff'; ctx.fillRect(ml, mt, S, S);
+      }
 
-      const cs = getComputedStyle(document.body);
-      const font = cs.fontFamily, txt = cs.color, fs = parseFloat(cs.fontSize);
+      // Contour lines at 10%..90% of the maximum density
+      if (chkCont.checked && vmax > 0) {
+        const X = x => ml + (x + 0.5) / GRID * S, Y = y => mt + (y + 0.5) / GRID * S;
+        ctx.save();
+        ctx.beginPath(); ctx.rect(ml, mt, S, S); ctx.clip();
+        ctx.lineWidth = wMaj; ctx.lineJoin = 'round';
+        for (let k = 1; k <= 9; k++) {
+          let col = '#000';
+          if (showMap) {
+            const c = cmap(name, k / 10);
+            col = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) < 140 ? '#fff' : '#000';
+          }
+          ctx.strokeStyle = col;
+          contourPath(k / 10 * vmax, X, Y);
+        }
+        ctx.restore();
+      }
+
       const px = x => ml + (x + E) / (2 * E) * S;
       const py = z => mt + (E - z) / (2 * E) * S;
 
@@ -270,39 +354,41 @@
             const s = (Math.abs(v) < 1e-9 ? 0 : +v.toFixed(6)).toString().replace('-', '\u2212');
             ctx.fillStyle = txt; ctx.font = `${fs}px ${font}`;
             ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-            ctx.fillText(s, a, mt + S + 5);
+            ctx.fillText(s, a, mt + S + pad);
             ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-            ctx.fillText(s, ml - 6, b);
+            ctx.fillText(s, ml - pad, b);
           }
         }
       }
-      ticks(2.5, 0.4, minor, false);
-      ticks(5, 0.5, step, true);
+      ticks(tMin, wMin, minor, false);
+      ticks(tMaj, wMaj, step, true);
 
       // Frame
-      ctx.strokeStyle = '#000'; ctx.lineWidth = 0.6;
+      ctx.strokeStyle = '#000'; ctx.lineWidth = wMaj;
       ctx.strokeRect(ml, mt, S, S);
 
       // Axis labels: italic variable, upright unit
       ctx.fillStyle = txt; ctx.textBaseline = 'middle';
       function axisLabel(v, cx, cy, rot) {
         ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
-        const it = `italic ${fs}px ${font}`, up = `${fs}px ${font}`;
+        const it = `italic ${fs}px ${font}`, up = `${fs}px ${font}`, sm = `${(fs * 0.7).toFixed(1)}px ${font}`;
         ctx.font = it; const w1 = ctx.measureText(v).width;
         ctx.font = up; const rest = ' (a'; const w2 = ctx.measureText(rest).width;
-        ctx.font = `${(fs * 0.7).toFixed(1)}px ${font}`; const w3 = ctx.measureText('0').width;
+        ctx.font = sm; const w3 = ctx.measureText('0').width;
         ctx.font = up; const w4 = ctx.measureText(')').width;
         let x0 = -(w1 + w2 + w3 + w4) / 2;
         ctx.textAlign = 'left';
         ctx.font = it; ctx.fillText(v, x0, 0); x0 += w1;
         ctx.font = up; ctx.fillText(rest, x0, 0); x0 += w2;
-        ctx.font = `${(fs * 0.7).toFixed(1)}px ${font}`; ctx.fillText('0', x0, fs * 0.25); x0 += w3;
+        ctx.font = sm; ctx.fillText('0', x0, fs * 0.25); x0 += w3;
         ctx.font = up; ctx.fillText(')', x0, 0);
         ctx.restore();
       }
       axisLabel('x', ml + S / 2, H - 12, 0);
       axisLabel('z', 14, mt + S / 2, -Math.PI / 2);
     }
+
+    function draw() { compute(); render(); }
 
     // ---------- Events ----------
     selN.addEventListener('change', () => {
@@ -313,13 +399,16 @@
     selL.addEventListener('change', () => { syncM(+selM.value); draw(); });
     selM.addEventListener('change', draw);
     rng.addEventListener('input', draw);
-    window.addEventListener('resize', draw);
+    chkMap.addEventListener('change', () => { selCmap.disabled = !chkMap.checked; render(); });
+    selCmap.addEventListener('change', render);
+    chkCont.addEventListener('change', render);
+    window.addEventListener('resize', render);
 
     // Initial state matches panel (a) of the gallery figure: n=3, l=1, m=0
     syncL(1, 0);
     rng.value = defaultExtent(3);
     draw();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
   </script>
 </body>
 
