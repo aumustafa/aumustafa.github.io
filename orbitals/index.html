@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hydrogen Orbitals</title>
+
+  <link rel="icon" href="../favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../styles.css" />
+
+  <style>
+    /* Page-specific additions; everything else comes from ../styles.css */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem 2rem;
+      align-items: flex-end;
+      margin-bottom: 1.25rem;
+    }
+
+    .control label {
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    .control select,
+    .control input[type="range"] {
+      font-family: var(--body-font);
+      font-size: inherit;
+      color: var(--text-color);
+      accent-color: var(--accent-color);
+    }
+
+    .control select {
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      padding: 0.25rem 0.5rem;
+      min-width: 4.5rem;
+    }
+
+    .control input[type="range"] {
+      width: 11rem;
+    }
+
+    .figure-title {
+      text-align: center;
+      margin-bottom: 0.4rem;
+    }
+
+    #plot {
+      display: block;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .caption {
+      text-align: center;
+      color: var(--muted-color);
+      margin-top: 0.75rem;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <p style="margin-bottom: 0.5rem;"><a href="../">&larr; Back to Home</a></p>
+      <h1>Hydrogen Atom Orbitals</h1>
+    </header>
+
+    <section class="bio">
+      <p>
+        The probability density |<i>&psi;<sub>nlm</sub></i>|<sup>2</sup> of the hydrogen atom, sliced through the
+        <i>x</i>&ndash;<i>z</i> plane (<i>y</i>&nbsp;=&nbsp;0). Pick the quantum numbers
+        <i>n</i>, <i>l</i>, and <i>m</i> below; the wavefunction is
+        <i>&psi;<sub>nlm</sub></i>&nbsp;=&nbsp;<i>R<sub>nl</sub>Y<sub>lm</sub></i> with distances in Bohr radii
+        (<i>a</i><sub>0</sub>). The colour scale is the same <a href="https://tol-colors.readthedocs.io/en/latest/"
+          target="_blank" rel="noopener">Paul Tol rainbow</a> map used in my
+        <a href="../plots-gallery/">plots gallery</a>, normalised to the maximum of each slice.
+      </p>
+    </section>
+
+    <section class="controls">
+      <div class="control">
+        <label for="selN"><i>n</i> (principal)</label>
+        <select id="selN"></select>
+      </div>
+      <div class="control">
+        <label for="selL"><i>l</i> (azimuthal)</label>
+        <select id="selL"></select>
+      </div>
+      <div class="control">
+        <label for="selM"><i>m</i> (magnetic)</label>
+        <select id="selM"></select>
+      </div>
+      <div class="control">
+        <label for="rngExtent">Half-width: <span id="extentVal"></span><i>a</i><sub>0</sub></label>
+        <input type="range" id="rngExtent" min="2" max="80" step="1" />
+      </div>
+    </section>
+
+    <div class="figure-title" id="figTitle"></div>
+    <canvas id="plot"></canvas>
+    <p class="caption" id="caption"></p>
+  </main>
+
+  <script>
+    // ---------- Physics (a0 = 1) ----------
+    function fact(k) { let f = 1; for (let i = 2; i <= k; i++) f *= i; return f; }
+
+    // Generalised Laguerre L_k^alpha(x) via recurrence
+    function genLaguerre(k, alpha, x) {
+      if (k === 0) return 1;
+      let Lm = 1, L = 1 + alpha - x;
+      for (let j = 1; j < k; j++) {
+        const Ln = ((2 * j + 1 + alpha - x) * L - (j + alpha) * Lm) / (j + 1);
+        Lm = L; L = Ln;
+      }
+      return L;
+    }
+
+    // Associated Legendre P_l^m(x), m >= 0 (sign convention irrelevant for |psi|^2)
+    function assocLegendre(l, m, x) {
+      let pmm = 1;
+      if (m > 0) {
+        const s = Math.sqrt(Math.max(0, 1 - x * x));
+        let f = 1;
+        for (let i = 1; i <= m; i++) { pmm *= -f * s; f += 2; }
+      }
+      if (l === m) return pmm;
+      let pm1 = x * (2 * m + 1) * pmm;
+      if (l === m + 1) return pm1;
+      let p = 0;
+      for (let ll = m + 2; ll <= l; ll++) {
+        p = (x * (2 * ll - 1) * pm1 - (ll + m - 1) * pmm) / (ll - m);
+        pmm = pm1; pm1 = p;
+      }
+      return p;
+    }
+
+    // |psi_nlm|^2 on the x-z plane; the phase e^{im phi} drops out of the modulus.
+    function makeDensity(n, l, m) {
+      const am = Math.abs(m);
+      const normR = (2 / n) ** 3 * fact(n - l - 1) / (2 * n * fact(n + l));
+      const normY = (2 * l + 1) / (4 * Math.PI) * fact(l - am) / fact(l + am);
+      return function (x, z) {
+        const r = Math.hypot(x, z);
+        if (r === 0) return l === 0 ? normR * normY * genLaguerre(n - 1, 1, 0) ** 2 : 0;
+        const rho = 2 * r / n;
+        const R = Math.exp(-rho / 2) * Math.pow(rho, l) * genLaguerre(n - l - 1, 2 * l + 1, rho);
+        const P = assocLegendre(l, am, z / r);
+        return normR * R * R * normY * P * P;
+      };
+    }
+
+    // ---------- Colour map: tol_colors.rainbow sampled at 17 stops ----------
+    const STOPS = ['#e8ecfb', '#d0bfe0', '#b38cc0', '#985ea4', '#6b509f', '#536ebd', '#4d8fc2', '#56a1ae', '#65ae96', '#84ba70', '#b7bd4c', '#daac3d', '#e78e36', '#e4652d', '#da2222', '#93211b', '#521a13']
+      .map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
+    function cmap(t) {
+      const s = Math.min(Math.max(t, 0), 1) * (STOPS.length - 1);
+      const i = Math.min(Math.floor(s), STOPS.length - 2), f = s - i;
+      return STOPS[i].map((c, k) => c + (STOPS[i + 1][k] - c) * f);
+    }
+
+    // ---------- UI ----------
+    const $ = id => document.getElementById(id);
+    const selN = $('selN'), selL = $('selL'), selM = $('selM'), rng = $('rngExtent');
+    const canvas = $('plot'), ctx = canvas.getContext('2d');
+    const LETTERS = 'spdfghik';
+    const GRID = 300;
+    const off = document.createElement('canvas');
+    off.width = off.height = GRID;
+
+    function fill(sel, values, current, fmt) {
+      sel.innerHTML = '';
+      values.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = fmt ? fmt(v) : v;
+        sel.appendChild(o);
+      });
+      sel.value = values.includes(current) ? current : values[0];
+    }
+    const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+    const defaultExtent = n => Math.round(2 * n * n + 10);
+
+    for (let n = 1; n <= 8; n++) selN.add(new Option(n, n));
+    selN.value = 3;
+
+    function syncL(keepL, keepM) {
+      const n = +selN.value;
+      fill(selL, range(0, n - 1), keepL, v => `${v} (${LETTERS[v] || ''})`);
+      syncM(keepM);
+    }
+    function syncM(keepM) {
+      const l = +selL.value;
+      fill(selM, range(-l, l), keepM);
+    }
+
+    function niceStep(span) {
+      const raw = span / 6, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+      const mant = f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10;
+      return { step: mant * p, minor: mant * p / (mant === 2 ? 4 : 5) };
+    }
+
+    function draw() {
+      const n = +selN.value, l = +selL.value, m = +selM.value, E = +rng.value;
+      $('extentVal').textContent = E;
+      $('figTitle').innerHTML =
+        `<i>&psi;</i><sub>${n}${l}${m}</sub> = <i>R</i><sub>${n}${l}</sub><i>Y</i><sub>${l}${m}</sub>`;
+      $('caption').innerHTML =
+        `${n}${LETTERS[l] || ''} orbital, <i>m</i> = ${m} &middot; ${n - l - 1} radial node${n - l - 1 === 1 ? '' : 's'}, ${l} angular node${l === 1 ? '' : 's'}`;
+
+      // Density -> offscreen image (row 0 = top = +z)
+      const dens = makeDensity(n, l, m);
+      const vals = new Float64Array(GRID * GRID);
+      let max = 0;
+      for (let j = 0; j < GRID; j++) {
+        const z = E - (2 * E) * (j + 0.5) / GRID;
+        for (let i = 0; i < GRID; i++) {
+          const x = -E + (2 * E) * (i + 0.5) / GRID;
+          const v = dens(x, z);
+          vals[j * GRID + i] = v;
+          if (v > max) max = v;
+        }
+      }
+      const img = off.getContext('2d').createImageData(GRID, GRID);
+      for (let k = 0; k < vals.length; k++) {
+        const c = cmap(max > 0 ? vals[k] / max : 0);
+        img.data[4 * k] = c[0]; img.data[4 * k + 1] = c[1]; img.data[4 * k + 2] = c[2]; img.data[4 * k + 3] = 255;
+      }
+      off.getContext('2d').putImageData(img, 0, 0);
+
+      // Canvas layout
+      const dpr = window.devicePixelRatio || 1;
+      const W = canvas.clientWidth;
+      const ml = 58, mr = 12, mt = 10, mb = 50;
+      const S = W - ml - mr, H = S + mt + mb;
+      canvas.style.height = H + 'px';
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(off, ml, mt, S, S);
+
+      const cs = getComputedStyle(document.body);
+      const font = cs.fontFamily, txt = cs.color, fs = parseFloat(cs.fontSize);
+      const px = x => ml + (x + E) / (2 * E) * S;
+      const py = z => mt + (E - z) / (2 * E) * S;
+
+      // Ticks: inward on all four sides, like despine=False
+      const { step, minor } = niceStep(2 * E);
+      function ticks(size, w, stepSize, labelled) {
+        ctx.lineWidth = w; ctx.strokeStyle = '#808080';
+        const start = Math.ceil(-E / stepSize - 1e-9);
+        for (let k = start; k * stepSize <= E + 1e-9; k++) {
+          const v = k * stepSize;
+          const a = px(v), b = py(v);
+          ctx.beginPath();
+          ctx.moveTo(a, mt + S); ctx.lineTo(a, mt + S - size);
+          ctx.moveTo(a, mt); ctx.lineTo(a, mt + size);
+          ctx.moveTo(ml, b); ctx.lineTo(ml + size, b);
+          ctx.moveTo(ml + S, b); ctx.lineTo(ml + S - size, b);
+          ctx.stroke();
+          if (labelled) {
+            const s = (Math.abs(v) < 1e-9 ? 0 : +v.toFixed(6)).toString().replace('-', '\u2212');
+            ctx.fillStyle = txt; ctx.font = `${fs}px ${font}`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillText(s, a, mt + S + 5);
+            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            ctx.fillText(s, ml - 6, b);
+          }
+        }
+      }
+      ticks(2.5, 0.4, minor, false);
+      ticks(5, 0.5, step, true);
+
+      // Frame
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 0.6;
+      ctx.strokeRect(ml, mt, S, S);
+
+      // Axis labels: italic variable, upright unit
+      ctx.fillStyle = txt; ctx.textBaseline = 'middle';
+      function axisLabel(v, cx, cy, rot) {
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+        const it = `italic ${fs}px ${font}`, up = `${fs}px ${font}`;
+        ctx.font = it; const w1 = ctx.measureText(v).width;
+        ctx.font = up; const rest = ' (a'; const w2 = ctx.measureText(rest).width;
+        ctx.font = `${(fs * 0.7).toFixed(1)}px ${font}`; const w3 = ctx.measureText('0').width;
+        ctx.font = up; const w4 = ctx.measureText(')').width;
+        let x0 = -(w1 + w2 + w3 + w4) / 2;
+        ctx.textAlign = 'left';
+        ctx.font = it; ctx.fillText(v, x0, 0); x0 += w1;
+        ctx.font = up; ctx.fillText(rest, x0, 0); x0 += w2;
+        ctx.font = `${(fs * 0.7).toFixed(1)}px ${font}`; ctx.fillText('0', x0, fs * 0.25); x0 += w3;
+        ctx.font = up; ctx.fillText(')', x0, 0);
+        ctx.restore();
+      }
+      axisLabel('x', ml + S / 2, H - 12, 0);
+      axisLabel('z', 14, mt + S / 2, -Math.PI / 2);
+    }
+
+    // ---------- Events ----------
+    selN.addEventListener('change', () => {
+      syncL(+selL.value, +selM.value);
+      rng.value = defaultExtent(+selN.value);
+      draw();
+    });
+    selL.addEventListener('change', () => { syncM(+selM.value); draw(); });
+    selM.addEventListener('change', draw);
+    rng.addEventListener('input', draw);
+    window.addEventListener('resize', draw);
+
+    // Initial state matches panel (a) of the gallery figure: n=3, l=1, m=0
+    syncL(1, 0);
+    rng.value = defaultExtent(3);
+    draw();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+  </script>
+</body>
+
+</html>
