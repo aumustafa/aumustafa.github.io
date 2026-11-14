@@ -72,6 +72,41 @@
       color: var(--muted-color);
       margin-top: 0.75rem;
     }
+
+    .btn {
+      font-family: var(--body-font);
+      font-size: inherit;
+      color: var(--accent-color);
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      padding: 0.2rem 0.7rem;
+      cursor: pointer;
+    }
+    .btn:hover:not(:disabled) { color: var(--accent-deep); }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+    .dots-row input[type="range"] { width: 9rem; accent-color: var(--accent-color); }
+    .dots-row { margin-top: 0.75rem; }
+
+    /* Same breakpoint as the main site's single-column layout */
+    @media (max-width: 700px) {
+      .controls:not(.options) {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .controls:not(.options) .control {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        gap: 0.75rem;
+        width: min(100%, 20rem);
+        text-align: left;
+      }
+      .controls:not(.options) .control label { margin-bottom: 0; }
+      .controls:not(.options) .control select,
+      .controls:not(.options) .control input[type="range"] { width: 100%; }
+    }
   </style>
 </head>
 
@@ -125,6 +160,12 @@
         <option value="rainbow">rainbow</option>
       </select>
       <label class="check"><input type="checkbox" id="chkCont"> Contour lines</label>
+    </section>
+
+    <section class="controls options dots-row">
+      <label class="check"><input type="checkbox" id="chkDots"> Electron dots</label>
+      <label class="check" for="rngDots"><input type="range" id="rngDots" min="200" max="20000" step="200" value="3000" disabled> <span id="dotsVal">3000</span></label>
+      <button class="btn" id="btnDots" disabled>Resample</button>
     </section>
   </main>
 
@@ -202,6 +243,9 @@
     const off = document.createElement('canvas');
     off.width = off.height = GRID;
     let vals = new Float64Array(GRID * GRID), vmax = 0, curE = 30;
+    const cdf = new Float64Array(GRID * GRID);
+    const chkDots = $('chkDots'), rngDots = $('rngDots'), btnDots = $('btnDots');
+    let dots = { n: 0, x: [], y: [], v: [] };
 
     function fill(sel, values, current, fmt) {
       sel.innerHTML = '';
@@ -267,8 +311,6 @@
       const n = +selN.value, l = +selL.value, m = +selM.value, E = +rng.value;
       curE = E;
       $('extentVal').textContent = E;
-    //   $('figTitle').innerHTML =
-        // `<i>&psi;</i><sub>${n}${l}${m}</sub> = <i>R</i><sub>${n}${l}</sub><i>Y</i><sub>${l}${m}</sub>`;
       $('caption').innerHTML =
         `${n}${LETTERS[l] || ''} orbital, <i>m</i> = ${m}; ${n - l - 1} radial node${n - l - 1 === 1 ? '' : 's'}, ${l} angular node${l === 1 ? '' : 's'}`;
       const dens = makeDensity(n, l, m);
@@ -282,6 +324,29 @@
           if (v > vmax) vmax = v;
         }
       }
+      let acc = 0;
+      for (let k = 0; k < vals.length; k++) { acc += vals[k]; cdf[k] = acc; }
+      sample();
+    }
+
+    // Draw N points with probability proportional to |psi|^2 (inverse-CDF on the grid, jittered within a cell)
+    function sample() {
+      const N = chkDots.checked ? +rngDots.value : 0;
+      $('dotsVal').textContent = rngDots.value;
+      const d = { n: 0, x: new Float32Array(N), y: new Float32Array(N), v: new Float32Array(N) };
+      const tot = cdf[cdf.length - 1];
+      if (N && tot > 0) {
+        for (let k = 0; k < N; k++) {
+          const r = Math.random() * tot;
+          let lo = 0, hi = cdf.length - 1;
+          while (lo < hi) { const mid = (lo + hi) >> 1; if (cdf[mid] < r) lo = mid + 1; else hi = mid; }
+          d.x[k] = (lo % GRID) + Math.random();
+          d.y[k] = Math.floor(lo / GRID) + Math.random();
+          d.v[k] = vals[lo] / vmax;
+        }
+        d.n = N;
+      }
+      dots = d;
     }
 
     function render() {
@@ -313,6 +378,25 @@
         ctx.drawImage(off, ml, mt, S, S);
       } else {
         ctx.fillStyle = '#fff'; ctx.fillRect(ml, mt, S, S);
+      }
+
+      // Electron dots: slightly transparent, so dense regions build up
+      if (dots.n) {
+        const rad = Math.max(0.9, fs * 0.07);
+        ctx.save(); ctx.globalAlpha = 0.4;
+        let last = '';
+        for (let k = 0; k < dots.n; k++) {
+          let col = '#000';
+          if (showMap) {
+            const c = cmap(name, dots.v[k]);
+            if (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2] < 140) col = '#fff';
+          }
+          if (col !== last) { ctx.fillStyle = col; last = col; }
+          ctx.beginPath();
+          ctx.arc(ml + dots.x[k] / GRID * S, mt + dots.y[k] / GRID * S, rad, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+        ctx.restore();
       }
 
       // Contour lines at 10%..90% of the maximum density
@@ -402,6 +486,9 @@
     chkMap.addEventListener('change', () => { selCmap.disabled = !chkMap.checked; render(); });
     selCmap.addEventListener('change', render);
     chkCont.addEventListener('change', render);
+    chkDots.addEventListener('change', () => { rngDots.disabled = btnDots.disabled = !chkDots.checked; sample(); render(); });
+    rngDots.addEventListener('input', () => { sample(); render(); });
+    btnDots.addEventListener('click', () => { sample(); render(); });
     window.addEventListener('resize', render);
 
     // Initial state matches panel (a) of the gallery figure: n=3, l=1, m=0
