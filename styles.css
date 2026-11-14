@@ -1,5 +1,4 @@
 @import url("sentient.css");
-@import url("satoshi.css");
 
 :root {
   --text-color: #2a2420;
@@ -31,7 +30,7 @@ body {
   font-weight: 400;
   color: var(--text-color);
   -webkit-font-smoothing: antialiased;
-  line-height: 1.25;
+  /* line-height: 1.25; */
 }
 
 strong {
@@ -167,8 +166,8 @@ strong {
 h1 {
   /* font-family: var(--serif-font); */
   /* font-size: 2.95rem; This was for Instrument Serif */
-  font-size: 1.95rem;
-  font-stretch: expanded;
+  /* font-size: 1.95rem; */
+  /* font-stretch: expanded; */
   /* white-space: nowrap; */
   font-weight: 400;
   color: var(--accent-deep);
