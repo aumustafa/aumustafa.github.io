@@ -99,12 +99,13 @@
         </p>
       </div>
       <p>
-        The Fourier series allows you to represent a periodic function <i>z</i>(<i>t</i>) in a basis of oscillation components cis(2&pi;<i>kt</i>), thus expressing it as <i>z</i>(<i>t</i>)&nbsp;=&nbsp;&Sigma;&nbsp;<i>c<sub>k</sub></i>&thinsp;cis(2&pi;<i>kt</i>). A cool way to represent this is to draw circles rotating at a frequency of <i>k</i>, with each circle being connected to the one before, representing a sum. The tip of the last circle can trace out any closed curve (here, Charlie Brown), just like how the Fourier sum is equal to any periodic function.
+        The Fourier series allows you to represent a periodic function <i>z</i>(<i>t</i>) in a basis of oscillation components cis(2&pi;<i>kt</i>), thus expressing it as <i>z</i>(<i>t</i>)&nbsp;=&nbsp;&Sigma;&nbsp;<i>c<sub>k</sub></i>&thinsp;cis(2&pi;<i>kt</i>). A cool way to represent this is to draw circles rotating at a frequency <i>k</i>, with each circle being connected to the one before, representing a sum. The tip of the last circle can trace out any closed curve (here, Charlie Brown), just like how the Fourier sum is equal to any periodic function.
       </p>
       <p>
         The sliders change how the image is read: <i>Detail</i> sets how coarsely it is sampled,
-        <i>Minimum stroke size</i> drops small isolated pieces, <i>Edge threshold</i> sets how bright (or opaque) a
-        pixel must be to count as an edge, and <i>Circles</i> sets how many circles are used. When the drawing
+        <i>Minimum stroke size</i> drops small isolated pieces, <i>Edge threshold</i> sets how strong an edge
+        (a sharp change in brightness, or an opaque pixel in line art) must be to be traced, and <i>Circles</i> sets how many circles are used. <i>Silhouette only</i> traces just the
+        outer outline of the figure; turning it off traces the edges of the detail drawn inside instead. When the drawing
         finishes, the original image fades in over it; <i>Fade in image</i> sets how long that takes. Press Restart
         to watch it again.
       </p>
@@ -117,7 +118,7 @@
     <section class="controls options">
       <button class="btn" id="btnRestart">Restart</button>
       <label class="check"><input type="checkbox" id="chkCircles" checked> Show circles</label>
-      <label class="check"><input type="checkbox" id="chkOutline" checked> Trace silhouette outline</label>
+      <label class="check"><input type="checkbox" id="chkOutline" checked> Silhouette only</label>
     </section>
 
     <section class="controls sliders">
@@ -160,10 +161,10 @@
         circles: 301,     // total circles (always odd: k = -K..K)
         detail: 120,      // grid cells across the longest side: lower = coarser, simpler outlines
         minStroke: 15,    // drop isolated strokes smaller than this many cells
-        threshold: 0.35,  // 0-1; how bright/opaque a pixel must be to count as an edge
+        threshold: 0.35,  // 0-1; how bright/opaque (or, for edge detection, how strong) a pixel must be to count as an edge
         duration: 30,     // seconds for one full trace
         hold: 4,          // seconds the original image takes to fade in once the trace is finished
-        outline: true     // for background-removed pictures, also trace the silhouette's outline
+        outline: true     // for background-removed pictures: true = trace only the silhouette, false = trace only the interior edges
       };
       // Not exposed as sliders
       const MAX_POINTS = 6000;       // cap on edge points fed to the tour (keeps it fast)
@@ -187,6 +188,33 @@
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       // ---------- 0. Decode the image once ----------
+      // Sobel gradient magnitude, normalised to 0-1. Transparent neighbours are
+      // ignored (treated as equal to the centre pixel) so the silhouette's border
+      // doesn't register as an interior edge.
+      function sobel(lum, alpha, w, h) {
+        const g = new Float32Array(w * h);
+        let max = 0;
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const c = lum[y * w + x];
+            const at = (xx, yy) => {
+              if (xx < 0 || yy < 0 || xx >= w || yy >= h) return c;
+              const j = yy * w + xx;
+              return alpha[j] > 0.5 ? lum[j] : c;
+            };
+            const gx = (at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1))
+                     - (at(x - 1, y - 1) + 2 * at(x - 1, y) + at(x - 1, y + 1));
+            const gy = (at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1))
+                     - (at(x - 1, y - 1) + 2 * at(x, y - 1) + at(x + 1, y - 1));
+            const m = Math.hypot(gx, gy);
+            g[y * w + x] = m;
+            if (m > max) max = m;
+          }
+        }
+        if (max > 0) for (let i = 0; i < g.length; i++) g[i] /= max;
+        return g;
+      }
+
       let src = null;
       function decode(img) {
         const s = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
@@ -212,18 +240,18 @@
         // Three cases:
         //  - fully opaque image: edges are the minority tone (dark-on-light or light-on-dark)
         //  - transparent line art (little of it is opaque): edges are the opaque pixels
-        //  - background removed (a large opaque silhouette): edges are the tone drawn
-        //    inside the silhouette, plus the silhouette's own outline
+        //  - background removed (a large opaque silhouette): either the silhouette's own
+        //    outline, or the edges of the tones drawn inside it (see S.outline)
         const filled = transparent && opaque / n > FILLED_FRACTION;
         const invert = filled
           ? (opaque > 0 && sumOpaque / opaque > 0.5)
           : (!transparent && sumAll / n > 0.5);
-        return { w, h, lum, alpha, transparent, filled, invert };
+        return { w, h, lum, alpha, transparent, filled, invert, edge: sobel(lum, alpha, w, h) };
       }
 
       // ---------- 1. Find the edge pixels ----------
       function inkPixels() {
-        const { w, h, lum, alpha, transparent, filled, invert } = src;
+        const { w, h, lum, alpha, transparent, filled, invert, edge } = src;
         const solid = (x, y) => x < 0 || y < 0 || x >= w || y >= h || alpha[y * w + x] > 0.5;
         const xs = [], ys = [];
         for (let y = 0; y < h; y++) {
@@ -234,9 +262,14 @@
             else if (!filled) v = alpha[i];
             else if (alpha[i] <= 0.5) v = 0;
             else {
-              v = invert ? 1 - lum[i] : lum[i];
-              const inside = solid(x - 1, y) && solid(x + 1, y) && solid(x, y - 1) && solid(x, y + 1);
-              if (S.outline && !inside) v = 1;
+              if (S.outline) {
+                // Silhouette only: an opaque pixel touching a transparent one
+                const inside = solid(x - 1, y) && solid(x + 1, y) && solid(x, y - 1) && solid(x, y + 1);
+                v = inside ? 0 : 1;
+              } else {
+                // Interior detail only: edges of the tones drawn inside the silhouette
+                v = edge[i];
+              }
             }
             if (v > S.threshold) { xs.push(x); ys.push(y); }
           }
@@ -474,7 +507,7 @@
         const [tx, ty] = evalAt(u);
         ctx.lineTo(ox + tx * scale, oy + ty * scale);
         ctx.strokeStyle = COLOUR.trace;
-        ctx.lineWidth = 1.25;
+        ctx.lineWidth = 2;
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.stroke();
