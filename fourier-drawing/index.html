@@ -44,8 +44,7 @@
     .options { align-items: center; margin-top: 1rem; margin-bottom: 0; }
     .sliders { margin-top: 1.25rem; margin-bottom: 0; }
 
-    .check { display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; }
-    .check input { accent-color: var(--accent-color); }
+    .picker { display: inline-flex; align-items: center; gap: 0.5rem; }
 
     .btn {
       font-family: var(--body-font);
@@ -58,6 +57,19 @@
       cursor: pointer;
     }
     .btn:hover { color: var(--accent-deep); }
+
+    /* Dropdown: same styling as the selects on the orbitals page */
+    .select {
+      font-family: var(--body-font);
+      font-size: inherit;
+      color: var(--text-color);
+      accent-color: var(--accent-color);
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      padding: 0.25rem 0.5rem;
+      min-width: 4.5rem;
+    }
 
     /* Same breakpoint as the main site's single-column layout */
     @media (max-width: 700px) {
@@ -99,26 +111,28 @@
         </p>
       </div>
       <p>
-        The Fourier series allows you to represent a periodic function <i>z</i>(<i>t</i>) in a basis of oscillation components cis(2&pi;<i>kt</i>), thus expressing it as <i>z</i>(<i>t</i>)&nbsp;=&nbsp;&Sigma;&nbsp;<i>c<sub>k</sub></i>&thinsp;cis(2&pi;<i>kt</i>). A cool way to represent this is to draw circles rotating at a frequency <i>k</i>, with each circle being connected to the one before, representing a sum. The tip of the last circle can trace out any closed curve (here, Charlie Brown), just like how the Fourier sum is equal to any periodic function.
+        The Fourier series allows you to represent a periodic function <i>z</i>(<i>t</i>) in a basis of oscillation components cis(2&pi;<i>kt</i>), thus expressing it as <i>z</i>(<i>t</i>)&nbsp;=&nbsp;&Sigma;&nbsp;<i>c<sub>k</sub></i>&thinsp;cis(2&pi;<i>kt</i>). A cool way to represent this is to draw circles rotating at a frequency <i>k</i>, with each circle being connected to the one before, representing a sum. The tip of the last circle can trace out any closed curve (here, Charlie Brown, Snoopy, or a maple leaf), just like how the Fourier sum is equal to any periodic function.
       </p>
       <p>
-        The sliders change how the image is read: <i>Detail</i> sets how coarsely it is sampled,
-        <i>Minimum stroke size</i> drops small isolated pieces, <i>Edge threshold</i> sets how strong an edge
-        (a sharp change in brightness, or an opaque pixel in line art) must be to be traced, and <i>Circles</i> sets how many circles are used. <i>Silhouette only</i> traces just the
-        outer outline of the figure; turning it off traces the edges of the detail drawn inside instead. When the drawing
-        finishes, the original image fades in over it; <i>Fade in image</i> sets how long that takes. Press Restart
-        to watch it again.
+        Pick a figure from the menu to see its outline traced. <i>Circles</i> sets how many circles are used, and
+        <i>Duration</i> sets how long the trace takes. When the drawing finishes, the original image fades in over it.
+        Press Restart to watch it again.
       </p>
     </section>
 
     <div class="stage" id="stage">
-      <canvas id="trace" role="img" aria-label="A portrait drawn by a chain of rotating circles"></canvas>
+      <canvas id="trace" role="img" aria-label="A figure drawn by a chain of rotating circles"></canvas>
     </div>
 
     <section class="controls options">
+      <label class="picker" for="selImage">Figure:
+        <select class="select" id="selImage">
+          <option value="charlie-brown">Charlie Brown</option>
+          <option value="snoopy">Snoopy</option>
+          <option value="maple-leaf">Maple leaf</option>
+        </select>
+      </label>
       <button class="btn" id="btnRestart">Restart</button>
-      <label class="check"><input type="checkbox" id="chkCircles" checked> Show circles</label>
-      <label class="check"><input type="checkbox" id="chkOutline" checked> Silhouette only</label>
     </section>
 
     <section class="controls sliders">
@@ -127,24 +141,8 @@
         <input type="range" id="rngCircles" min="11" max="801" step="2" />
       </div>
       <div class="control">
-        <label for="rngDetail">Detail: <span id="valDetail"></span></label>
-        <input type="range" id="rngDetail" min="30" max="300" step="5" />
-      </div>
-      <div class="control">
-        <label for="rngStroke">Minimum stroke size: <span id="valStroke"></span></label>
-        <input type="range" id="rngStroke" min="0" max="100" step="1" />
-      </div>
-      <div class="control">
-        <label for="rngThreshold">Edge threshold: <span id="valThreshold"></span></label>
-        <input type="range" id="rngThreshold" min="0.05" max="0.95" step="0.05" />
-      </div>
-      <div class="control">
         <label for="rngDuration">Duration: <span id="valDuration"></span>&nbsp;s</label>
         <input type="range" id="rngDuration" min="5" max="90" step="1" />
-      </div>
-      <div class="control">
-        <label for="rngHold">Fade in image: <span id="valHold"></span>&nbsp;s</label>
-        <input type="range" id="rngHold" min="0" max="10" step="1" />
       </div>
     </section>
 
@@ -155,18 +153,33 @@
 
   <script>
     (() => {
-      // ---------- Settings (the sliders write into this) ----------
-      const SRC = 'charlie-brown.png'; // path relative to this page
-      const S = {
-        circles: 301,     // total circles (always odd: k = -K..K)
+      // ---------- Figures available in the dropdown ----------
+      // `src` is relative to this page. `trace` optionally overrides the tracing
+      // defaults below for a figure that needs different treatment (e.g. a simpler
+      // shape like the maple leaf may want a lower `detail`).
+      const IMAGES = {
+        'charlie-brown': { src: 'charlie-brown.png' },
+        'snoopy':        { src: 'snoopy.png' },
+        'maple-leaf':    { src: 'maple-leaf.png' }
+      };
+      const DEFAULT_IMAGE = 'charlie-brown';
+
+      // Tracing parameters that used to be sliders; now fixed (per-figure overridable)
+      const TRACE_DEFAULTS = {
         detail: 120,      // grid cells across the longest side: lower = coarser, simpler outlines
         minStroke: 15,    // drop isolated strokes smaller than this many cells
-        threshold: 0.35,  // 0-1; how bright/opaque (or, for edge detection, how strong) a pixel must be to count as an edge
+        threshold: 0.35   // 0-1; how bright/opaque a pixel must be to count as an edge
+      };
+
+      // ---------- Settings (the sliders write into this) ----------
+      const S = {
+        ...TRACE_DEFAULTS,
+        circles: 301,     // total circles (always odd: k = -K..K)
         duration: 30,     // seconds for one full trace
         hold: 4,          // seconds the original image takes to fade in once the trace is finished
-        outline: true     // for background-removed pictures: true = trace only the silhouette, false = trace only the interior edges
+        outline: true     // background-removed pictures: trace only the silhouette
       };
-      // Not exposed as sliders
+      // Not exposed as controls
       const MAX_POINTS = 6000;       // cap on edge points fed to the tour (keeps it fast)
       const CURVE_SAMPLES = 6000;    // resolution of the drawn trace
       const MAX_SIDE = 1600;         // image is downscaled to this before analysis
@@ -188,42 +201,16 @@
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       // ---------- 0. Decode the image once ----------
-      // Sobel gradient magnitude, normalised to 0-1. Transparent neighbours are
-      // ignored (treated as equal to the centre pixel) so the silhouette's border
-      // doesn't register as an interior edge.
-      function sobel(lum, alpha, w, h) {
-        const g = new Float32Array(w * h);
-        let max = 0;
-        for (let y = 0; y < h; y++) {
-          for (let x = 0; x < w; x++) {
-            const c = lum[y * w + x];
-            const at = (xx, yy) => {
-              if (xx < 0 || yy < 0 || xx >= w || yy >= h) return c;
-              const j = yy * w + xx;
-              return alpha[j] > 0.5 ? lum[j] : c;
-            };
-            const gx = (at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1))
-                     - (at(x - 1, y - 1) + 2 * at(x - 1, y) + at(x - 1, y + 1));
-            const gy = (at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1))
-                     - (at(x - 1, y - 1) + 2 * at(x, y - 1) + at(x + 1, y - 1));
-            const m = Math.hypot(gx, gy);
-            g[y * w + x] = m;
-            if (m > max) max = m;
-          }
-        }
-        if (max > 0) for (let i = 0; i < g.length; i++) g[i] /= max;
-        return g;
-      }
-
       let src = null;
-      function decode(img) {
-        const s = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
-        const w = Math.max(1, Math.round(img.naturalWidth * s));
-        const h = Math.max(1, Math.round(img.naturalHeight * s));
+      let img = null;
+      function decode(image) {
+        const s = Math.min(1, MAX_SIDE / Math.max(image.naturalWidth, image.naturalHeight));
+        const w = Math.max(1, Math.round(image.naturalWidth * s));
+        const h = Math.max(1, Math.round(image.naturalHeight * s));
         const c = document.createElement('canvas');
         c.width = w; c.height = h;
         const g = c.getContext('2d', { willReadFrequently: true });
-        g.drawImage(img, 0, 0, w, h);
+        g.drawImage(image, 0, 0, w, h);
         const px = g.getImageData(0, 0, w, h).data;
 
         const n = w * h;
@@ -240,18 +227,17 @@
         // Three cases:
         //  - fully opaque image: edges are the minority tone (dark-on-light or light-on-dark)
         //  - transparent line art (little of it is opaque): edges are the opaque pixels
-        //  - background removed (a large opaque silhouette): either the silhouette's own
-        //    outline, or the edges of the tones drawn inside it (see S.outline)
+        //  - background removed (a large opaque silhouette): trace the silhouette's own outline
         const filled = transparent && opaque / n > FILLED_FRACTION;
         const invert = filled
           ? (opaque > 0 && sumOpaque / opaque > 0.5)
           : (!transparent && sumAll / n > 0.5);
-        return { w, h, lum, alpha, transparent, filled, invert, edge: sobel(lum, alpha, w, h) };
+        return { w, h, lum, alpha, transparent, filled, invert };
       }
 
       // ---------- 1. Find the edge pixels ----------
       function inkPixels() {
-        const { w, h, lum, alpha, transparent, filled, invert, edge } = src;
+        const { w, h, lum, alpha, transparent, filled, invert } = src;
         const solid = (x, y) => x < 0 || y < 0 || x >= w || y >= h || alpha[y * w + x] > 0.5;
         const xs = [], ys = [];
         for (let y = 0; y < h; y++) {
@@ -262,14 +248,9 @@
             else if (!filled) v = alpha[i];
             else if (alpha[i] <= 0.5) v = 0;
             else {
-              if (S.outline) {
-                // Silhouette only: an opaque pixel touching a transparent one
-                const inside = solid(x - 1, y) && solid(x + 1, y) && solid(x, y - 1) && solid(x, y + 1);
-                v = inside ? 0 : 1;
-              } else {
-                // Interior detail only: edges of the tones drawn inside the silhouette
-                v = edge[i];
-              }
+              // Silhouette: an opaque pixel touching a transparent one
+              const inside = solid(x - 1, y) && solid(x + 1, y) && solid(x, y - 1) && solid(x, y + 1);
+              v = inside ? 0 : 1;
             }
             if (v > S.threshold) { xs.push(x); ys.push(y); }
           }
@@ -388,7 +369,7 @@
 
       // ---------- Build, layout, draw ----------
       let coeffs = null, curveX, curveY;
-      let frame = null;                 // framing box, fixed on first build so the canvas does not jump around
+      let frame = null;                 // framing box, fixed per figure so the canvas does not jump around when the sliders move
       let ready = false;
       let playing = false;              // true while the trace / fade is animating; false once it has finished
       let viewW = 0, viewH = 0, scale = 1;
@@ -470,14 +451,13 @@
         ctx.clearRect(0, 0, viewW, viewH);
 
         // The original image, positioned in the same coordinates as the traced points
-        if (fade > 0 && src && img.complete) {
+        if (fade > 0 && src && img && img.complete) {
           ctx.globalAlpha = Math.min(1, fade);
           ctx.drawImage(img, ox - frame.cx * scale, oy - frame.cy * scale, src.w * scale, src.h * scale);
           ctx.globalAlpha = 1;
         }
 
         if (showChain) {
-          const showRings = $('chkCircles').checked;
           const rings = new Path2D(), arms = new Path2D();
           let x = coeffs.dcRe, y = coeffs.dcIm;
           const a = 2 * Math.PI * u;
@@ -486,7 +466,7 @@
             const t = a * c.k, co = Math.cos(t), si = Math.sin(t);
             const nx = x + c.re * co - c.im * si;
             const ny = y + c.re * si + c.im * co;
-            if (showRings && c.r * scale >= 2) {
+            if (c.r * scale >= 2) {
               rings.moveTo(ox + x * scale + c.r * scale, oy + y * scale);
               rings.arc(ox + x * scale, oy + y * scale, c.r * scale, 0, 2 * Math.PI);
             }
@@ -494,7 +474,7 @@
             x = nx; y = ny;
           }
           ctx.lineWidth = 0.75;
-          if (showRings) { ctx.globalAlpha = 0.6; ctx.strokeStyle = COLOUR.ring; ctx.stroke(rings); }
+          ctx.globalAlpha = 0.6; ctx.strokeStyle = COLOUR.ring; ctx.stroke(rings);
           ctx.globalAlpha = 0.9; ctx.strokeStyle = COLOUR.arm; ctx.stroke(arms);
           ctx.globalAlpha = 1;
         }
@@ -549,11 +529,7 @@
       // [slider id, value label id, setting key, needs a rebuild?]
       const SLIDERS = [
         ['rngCircles', 'valCircles', 'circles', true],
-        ['rngDetail', 'valDetail', 'detail', true],
-        ['rngStroke', 'valStroke', 'minStroke', true],
-        ['rngThreshold', 'valThreshold', 'threshold', true],
-        ['rngDuration', 'valDuration', 'duration', false],
-        ['rngHold', 'valHold', 'hold', false]
+        ['rngDuration', 'valDuration', 'duration', false]
       ];
       for (const [id, outId, key, needsRebuild] of SLIDERS) {
         const el = $(id), out = $(outId);
@@ -569,17 +545,39 @@
         });
       }
 
-      $('chkOutline').checked = S.outline;
-      $('chkOutline').addEventListener('change', e => { S.outline = e.target.checked; schedule(); });
-      $('chkCircles').addEventListener('change', () => { if (ready) draw(state.u, state.chain, state.fade); });
       $('btnRestart').addEventListener('click', restart);
       window.addEventListener('resize', () => { layout(); if (ready) draw(state.u, state.chain, state.fade); });
 
+      // ---------- Loading a figure ----------
+      let loadToken = 0; // lets a newer selection win if an older image finishes loading late
+      function loadFigure(key) {
+        const entry = IMAGES[key] || IMAGES[DEFAULT_IMAGE];
+        const token = ++loadToken;
+        clearTimeout(timer);
+        ready = false;
+        playing = false;
+        Object.assign(S, TRACE_DEFAULTS, entry.trace || {});
+
+        const next = new Image();
+        next.onload = () => {
+          if (token !== loadToken) return;
+          img = next;
+          src = decode(next);
+          frame = null; // re-frame for the new figure
+          rebuild();
+        };
+        next.onerror = () => {
+          if (token === loadToken) console.error('fourier-epicycles: could not load ' + entry.src);
+        };
+        next.src = entry.src;
+      }
+
+      $('selImage').addEventListener('change', e => loadFigure(e.target.value));
+
       // ---------- Go ----------
-      const img = new Image();
-      img.onload = () => { src = decode(img); rebuild(); requestAnimationFrame(tick); };
-      img.onerror = () => console.error('fourier-epicycles: could not load ' + SRC);
-      img.src = SRC;
+      $('selImage').value = DEFAULT_IMAGE;
+      loadFigure(DEFAULT_IMAGE);
+      requestAnimationFrame(tick);
     })();
   </script>
 </body>
