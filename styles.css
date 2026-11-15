@@ -481,3 +481,13 @@ h2 {
   letter-spacing: 0.05em;
   color: var(--muted-color);
 }
+
+.disclaimer {
+  font-size: 0.8rem;
+  line-height: 1.4;      /* small text reads better with a bit more leading than the 1.25 body default */
+  color: var(--muted-color);
+  text-align: center;
+  text-wrap: balance;    /* evens out line lengths when it wraps */
+  margin-top: 3rem;
+  margin-bottom: 0;
+}

@@ -114,15 +114,17 @@
   <main class="container">
     <header>
       <p style="margin-bottom: 0.5rem;"><a href="../">&larr; Back to Home</a></p>
-      <h1>Hydrogen Atom Orbitals</h1>
+      <h1>Atomic Orbitals of Hydrogen</h1>
     </header>
 
     <section class="bio">
       <p>
-        The probability density |<i>&psi;<sub>nlm</sub></i>|<sup>2</sup> of the hydrogen atom, sliced through the
-        <i>x</i>&ndash;<i>z</i> plane (<i>y</i>&nbsp;=&nbsp;0). Pick the quantum numbers
-        <i>n</i>, <i>l</i>, and <i>m</i> below; the wavefunction is
-        <i>&psi;<sub>nlm</sub></i>&nbsp;=&nbsp;<i>R<sub>nl</sub>Y<sub>lm</sub></i> with distances in Bohr radii
+        <i><a href="https://en.wikipedia.org/wiki/Natura_non_facit_saltus"
+          target="_blank" rel="noopener">"Nature [in its workings] makes no jumps."</a></i> <br>
+        A 15th century maxim and principle of natural philosophy that has been thoroughly disproven by quantum mechanics.
+      </p>
+      <p>
+        This is a plot of the probability density |<i>&psi;<sub>nlm</sub></i>|<sup>2</sup> of the hydrogen atom, sliced through the <i>x</i>&ndash;<i>z</i> plane (<i>y</i>&nbsp;=&nbsp;0). Pick the quantum numbers <i>n</i>, <i>l</i>, and <i>m</i> below; the wavefunction is <i>&psi;<sub>nlm</sub></i>&nbsp;=&nbsp;<i>R<sub>nl</sub>Y<sub>lm</sub></i> with distances in Bohr radii
         (<i>a</i><sub>0</sub>). The colour scales are from <a href="https://tol-colors.readthedocs.io/en/latest/"
           target="_blank" rel="noopener">Paul Tol's package</a>, normalised to the maximum of each slice. The electron dots represent measurements of the electron's position, and is my favourite way to view the orbitals.
       </p>
@@ -166,6 +168,11 @@
       <label class="check" for="rngDots"><input type="range" id="rngDots" min="200" max="20000" step="200" value="3000" disabled> <span id="dotsVal">3000</span></label>
       <button class="btn" id="btnDots" disabled>Resample</button>
     </section>
+
+    <p class="disclaimer">
+      This plot was created by AI, but I have written the text and verified the output.
+    </p>
+  </main>
   </main>
 
   <script>
