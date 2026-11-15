@@ -1,22 +1,42 @@
 # LaTeX auxiliary/junk files
 *.aux
+*.auxlock
+*.bbl
+*.bcf
+*.blg
 *.fdb_latexmk
+*.figlist
 *.fls
+*.lof
 *.log
+*.lot
+*.makefile
+*.nav
 *.out
+*.run.xml
+*.snm
 *.synctex.gz
 *.toc
-*.lof
-*.lot
-*.bbl
-*.blg
-*.bcf
-*.run.xml
-*.nav
-*.snm
 *.vrb
 *.xdv
-*.figlist
-*.makefile
-*.fdb_latexmk
-*.auxlock
+
+# Personal notes
+notes.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
