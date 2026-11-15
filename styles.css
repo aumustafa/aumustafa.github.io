@@ -491,3 +491,15 @@ h2 {
   margin-top: 3rem;
   margin-bottom: 0;
 }
+
+.quotes {
+  margin-bottom: 1.25rem;
+}
+
+.quotes p {
+  margin-bottom: 0.6rem;
+}
+
+.quotes p:last-child {
+  margin-bottom: 0;
+}
