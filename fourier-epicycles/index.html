@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fourier Epicycles</title>
+
+  <link rel="icon" href="../favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../styles.css" />
+
+  <style>
+    /* Page-specific additions; everything else comes from ../styles.css */
+    .stage { width: 100%; }
+
+    #trace {
+      display: block;
+      margin: 0 auto;
+      cursor: pointer;
+      touch-action: manipulation; /* tap to restart without double-tap zoom */
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem 2rem;
+      justify-content: center;
+      align-items: flex-end;
+      margin-bottom: 1.25rem;
+    }
+
+    .control { text-align: center; }
+
+    .control label {
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    .control input[type="range"] {
+      width: 11rem;
+      font-family: var(--body-font);
+      accent-color: var(--accent-color);
+    }
+
+    .options { align-items: center; margin-top: 1rem; margin-bottom: 0; }
+    .sliders { margin-top: 1.25rem; margin-bottom: 0; }
+
+    .check { display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+    .check input { accent-color: var(--accent-color); }
+
+    .btn {
+      font-family: var(--body-font);
+      font-size: inherit;
+      color: var(--accent-color);
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      padding: 0.2rem 0.7rem;
+      cursor: pointer;
+    }
+    .btn:hover { color: var(--accent-deep); }
+
+    /* Same breakpoint as the main site's single-column layout */
+    @media (max-width: 700px) {
+      .sliders {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .sliders .control {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        gap: 0.75rem;
+        width: min(100%, 20rem);
+        text-align: left;
+      }
+      .sliders .control label { margin-bottom: 0; }
+      .sliders .control input[type="range"] { width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <p style="margin-bottom: 0.5rem;"><a href="../">&larr; Back to Home</a></p>
+      <h1>Fourier Epicycles</h1>
+    </header>
+
+    <section class="bio">
+      <p>
+        The Fourier series allows you to represent a function in a basis of oscillation components cis(2&pi;<i>ikt</i>), thus expressing it as <i>z</i>(<i>t</i>)&nbsp;=&nbsp;&Sigma;&nbsp;<i>c<sub>k</sub></i>&thinsp;cis(2&pi;<i>ikt</i>). A cool way to represent this is to draw circles rotating at a frequency of <i>k</i>, with each circle being connected to the one before, representing a sum. The tip of the last circle can trace out any closed curve (here, it is Da Vinci's Mona Lisa), just like how the Fourier sum is equal to any periodic function.
+      </p>
+      <p>
+        The sliders change how the image is read: <i>Detail</i> sets how coarsely it is sampled,
+        <i>Minimum stroke size</i> drops small isolated pieces, <i>Edge threshold</i> sets how bright (or opaque) a
+        pixel must be to count as an edge, and <i>Circles</i> sets how many circles are used. Click the drawing to
+        restart it.
+      </p>
+    </section>
+
+    <div class="stage" id="stage">
+      <canvas id="trace" role="img" aria-label="A portrait drawn by a chain of rotating circles"></canvas>
+    </div>
+
+    <section class="controls options">
+      <button class="btn" id="btnRestart">Restart</button>
+      <label class="check"><input type="checkbox" id="chkCircles" checked> Show circles</label>
+      <label class="check"><input type="checkbox" id="chkOutline" checked> Trace silhouette outline</label>
+    </section>
+
+    <section class="controls sliders">
+      <div class="control">
+        <label for="rngCircles">Circles: <span id="valCircles"></span></label>
+        <input type="range" id="rngCircles" min="11" max="801" step="2" />
+      </div>
+      <div class="control">
+        <label for="rngDetail">Detail: <span id="valDetail"></span></label>
+        <input type="range" id="rngDetail" min="30" max="300" step="5" />
+      </div>
+      <div class="control">
+        <label for="rngStroke">Minimum stroke size: <span id="valStroke"></span></label>
+        <input type="range" id="rngStroke" min="0" max="100" step="1" />
+      </div>
+      <div class="control">
+        <label for="rngThreshold">Edge threshold: <span id="valThreshold"></span></label>
+        <input type="range" id="rngThreshold" min="0.05" max="0.95" step="0.05" />
+      </div>
+      <div class="control">
+        <label for="rngDuration">Duration: <span id="valDuration"></span>&nbsp;s</label>
+        <input type="range" id="rngDuration" min="5" max="90" step="1" />
+      </div>
+      <div class="control">
+        <label for="rngHold">Pause at end: <span id="valHold"></span>&nbsp;s</label>
+        <input type="range" id="rngHold" min="0" max="10" step="1" />
+      </div>
+    </section>
+
+    <p class="disclaimer">
+      The drawing script has been created by AI, but I have written and confirmed the explanatory text.
+    </p>
+  </main>
+
+  <script>
+    (() => {
+      // ---------- Settings (the sliders write into this) ----------
+      const SRC = 'mona-lisa.png'; // path relative to this page
+      const S = {
+        circles: 301,     // total circles (always odd: k = -K..K)
+        detail: 120,      // grid cells across the longest side: lower = coarser, simpler outlines
+        minStroke: 15,    // drop isolated strokes smaller than this many cells
+        threshold: 0.35,  // 0-1; how bright/opaque a pixel must be to count as an edge
+        duration: 30,     // seconds for one full trace
+        hold: 4,          // seconds to show the finished drawing before replaying
+        outline: true     // for background-removed pictures, also trace the silhouette's outline
+      };
+      // Not exposed as sliders
+      const MAX_POINTS = 6000;       // cap on edge points fed to the tour (keeps it fast)
+      const CURVE_SAMPLES = 6000;    // resolution of the drawn trace
+      const MAX_SIDE = 1600;         // image is downscaled to this before analysis
+      const FILLED_FRACTION = 0.2;   // transparent PNGs with more than this share opaque are treated as background-removed pictures
+
+      // ---------- Colours come from styles.css ----------
+      const rootStyle = getComputedStyle(document.documentElement);
+      const cssVar = (name, fallback) => rootStyle.getPropertyValue(name).trim() || fallback;
+      const COLOUR = {
+        trace: cssVar('--accent-color', '#004488'),
+        arm: cssVar('--muted-color', '#6b6258'),
+        ring: cssVar('--border-color', 'silver')
+      };
+
+      const $ = id => document.getElementById(id);
+      const stage = $('stage');
+      const canvas = $('trace');
+      const ctx = canvas.getContext('2d');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // ---------- 0. Decode the image once ----------
+      let src = null;
+      function decode(img) {
+        const s = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+        const w = Math.max(1, Math.round(img.naturalWidth * s));
+        const h = Math.max(1, Math.round(img.naturalHeight * s));
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const g = c.getContext('2d', { willReadFrequently: true });
+        g.drawImage(img, 0, 0, w, h);
+        const px = g.getImageData(0, 0, w, h).data;
+
+        const n = w * h;
+        const lum = new Float32Array(n), alpha = new Float32Array(n);
+        let transparent = false, opaque = 0, sumAll = 0, sumOpaque = 0;
+        for (let i = 0; i < n; i++) {
+          const a = px[4 * i + 3] / 255;
+          alpha[i] = a;
+          if (a < 0.98) transparent = true;
+          const l = (0.299 * px[4 * i] + 0.587 * px[4 * i + 1] + 0.114 * px[4 * i + 2]) / 255;
+          lum[i] = l; sumAll += l;
+          if (a > 0.5) { opaque++; sumOpaque += l; }
+        }
+        // Three cases:
+        //  - fully opaque image: edges are the minority tone (dark-on-light or light-on-dark)
+        //  - transparent line art (little of it is opaque): edges are the opaque pixels
+        //  - background removed (a large opaque silhouette): edges are the tone drawn
+        //    inside the silhouette, plus the silhouette's own outline
+        const filled = transparent && opaque / n > FILLED_FRACTION;
+        const invert = filled
+          ? (opaque > 0 && sumOpaque / opaque > 0.5)
+          : (!transparent && sumAll / n > 0.5);
+        return { w, h, lum, alpha, transparent, filled, invert };
+      }
+
+      // ---------- 1. Find the edge pixels ----------
+      function inkPixels() {
+        const { w, h, lum, alpha, transparent, filled, invert } = src;
+        const solid = (x, y) => x < 0 || y < 0 || x >= w || y >= h || alpha[y * w + x] > 0.5;
+        const xs = [], ys = [];
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const i = y * w + x;
+            let v;
+            if (!transparent) v = invert ? 1 - lum[i] : lum[i];
+            else if (!filled) v = alpha[i];
+            else if (alpha[i] <= 0.5) v = 0;
+            else {
+              v = invert ? 1 - lum[i] : lum[i];
+              const inside = solid(x - 1, y) && solid(x + 1, y) && solid(x, y - 1) && solid(x, y + 1);
+              if (S.outline && !inside) v = 1;
+            }
+            if (v > S.threshold) { xs.push(x); ys.push(y); }
+          }
+        }
+        return { w, h, xs, ys };
+      }
+
+      // Group occupied cells into connected strokes (8-neighbour) and keep only
+      // the big ones. If everything is small, keep everything rather than nothing.
+      function keepLargeStrokes(cnt, cols, rows) {
+        const keep = new Uint8Array(cnt.length);
+        const seen = new Uint8Array(cnt.length);
+        const stack = [];
+        let kept = 0;
+        for (let s = 0; s < cnt.length; s++) {
+          if (!cnt[s] || seen[s]) continue;
+          const comp = [s];
+          seen[s] = 1; stack.push(s);
+          while (stack.length) {
+            const k = stack.pop(), x = k % cols, y = (k / cols) | 0;
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                const nx = x + dx, ny = y + dy;
+                if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+                const j = ny * cols + nx;
+                if (cnt[j] && !seen[j]) { seen[j] = 1; stack.push(j); comp.push(j); }
+              }
+            }
+          }
+          if (comp.length >= S.minStroke) { for (const j of comp) keep[j] = 1; kept += comp.length; }
+        }
+        if (!kept) for (let k = 0; k < cnt.length; k++) if (cnt[k]) keep[k] = 1;
+        return keep;
+      }
+
+      // ---------- 2. Thin them to a manageable set of points ----------
+      // One point per grid cell (at the centroid of its edge pixels).
+      function samplePoints({ w, h, xs, ys }) {
+        let cell = Math.max(1, Math.ceil(Math.max(w, h) / S.detail));
+        for (;;) {
+          const cols = Math.ceil(w / cell), rows = Math.ceil(h / cell);
+          const sx = new Float64Array(cols * rows), sy = new Float64Array(cols * rows);
+          const cnt = new Uint32Array(cols * rows);
+          for (let i = 0; i < xs.length; i++) {
+            const k = Math.floor(ys[i] / cell) * cols + Math.floor(xs[i] / cell);
+            sx[k] += xs[i] + 0.5; sy[k] += ys[i] + 0.5; cnt[k]++;
+          }
+          const keep = keepLargeStrokes(cnt, cols, rows);
+          const px = [], py = [];
+          for (let k = 0; k < cnt.length; k++) {
+            if (keep[k]) { px.push(sx[k] / cnt[k]); py.push(sy[k] / cnt[k]); }
+          }
+          if (px.length <= MAX_POINTS || cell > Math.max(w, h)) {
+            return { x: Float64Array.from(px), y: Float64Array.from(py), n: px.length };
+          }
+          cell++;
+        }
+      }
+
+      // ---------- 3. Turn the points into ONE closed path ----------
+      // Minimum spanning tree (Prim), then walk it depth-first, retracing back
+      // up each branch. Every point is visited, the path closes on itself, and
+      // separate strokes get joined by the shortest possible link.
+      function closedTour({ x, y, n }) {
+        const par = new Int32Array(n).fill(-1);
+        const dist = new Float64Array(n).fill(Infinity);
+        const used = new Uint8Array(n);
+        let u = 0; used[0] = 1;
+        for (let it = 1; it < n; it++) {
+          let next = -1, best = Infinity;
+          const ux = x[u], uy = y[u];
+          for (let i = 0; i < n; i++) {
+            if (used[i]) continue;
+            const dx = x[i] - ux, dy = y[i] - uy, d = dx * dx + dy * dy;
+            if (d < dist[i]) { dist[i] = d; par[i] = u; }
+            if (dist[i] < best) { best = dist[i]; next = i; }
+          }
+          used[next] = 1; u = next;
+        }
+
+        const head = new Int32Array(n).fill(-1), nxt = new Int32Array(n).fill(-1);
+        for (let i = n - 1; i >= 1; i--) { nxt[i] = head[par[i]]; head[par[i]] = i; }
+
+        const order = [0], stack = [0], cur = head.slice();
+        while (stack.length) {
+          const v = stack[stack.length - 1], c = cur[v];
+          if (c !== -1) { cur[v] = nxt[c]; stack.push(c); order.push(c); }
+          else { stack.pop(); if (stack.length) order.push(stack[stack.length - 1]); }
+        }
+        order.pop(); // last entry is the start again; drop it so the loop is periodic
+        return order;
+      }
+
+      // ---------- 4. Discrete Fourier transform ----------
+      // c_k = (1/N) * sum_n z_n * exp(-2*pi*i*k*n/N), z = x + iy
+      function dft(zr, zi, N) {
+        const K = Math.min((S.circles - 1) >> 1, Math.floor((N - 1) / 2));
+        let dcRe = 0, dcIm = 0;
+        const list = [];
+        for (let k = -K; k <= K; k++) {
+          const th = -2 * Math.PI * k / N;
+          const wr = Math.cos(th), wi = Math.sin(th);
+          let cr = 1, ci = 0, re = 0, im = 0;
+          for (let n = 0; n < N; n++) {
+            re += zr[n] * cr - zi[n] * ci;
+            im += zr[n] * ci + zi[n] * cr;
+            const t = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = t;
+          }
+          re /= N; im /= N;
+          if (k === 0) { dcRe = re; dcIm = im; }
+          else list.push({ k, re, im, r: Math.hypot(re, im) });
+        }
+        list.sort((a, b) => b.r - a.r); // biggest circles first
+        return { dcRe, dcIm, list };
+      }
+
+      // ---------- Build, layout, draw ----------
+      let coeffs = null, curveX, curveY;
+      let frame = null;                 // framing box, fixed on first build so the canvas does not jump around
+      let ready = false;
+      let viewW = 0, viewH = 0, scale = 1;
+      let state = { u: 1, chain: false };
+      let elapsed = 0;
+
+      function evalAt(u) {
+        let x = coeffs.dcRe, y = coeffs.dcIm;
+        const a = 2 * Math.PI * u;
+        for (const c of coeffs.list) {
+          const t = a * c.k, co = Math.cos(t), si = Math.sin(t);
+          x += c.re * co - c.im * si;
+          y += c.re * si + c.im * co;
+        }
+        return [x, y];
+      }
+
+      function rebuild() {
+        if (!src) return;
+        const pts = samplePoints(inkPixels());
+        if (pts.n < 3) {
+          ready = false;
+          ctx.clearRect(0, 0, viewW, viewH);
+          return;
+        }
+        const order = closedTour(pts);
+        const N = order.length;
+
+        if (!frame) {
+          let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+          for (let i = 0; i < pts.n; i++) {
+            if (pts.x[i] < minX) minX = pts.x[i]; if (pts.x[i] > maxX) maxX = pts.x[i];
+            if (pts.y[i] < minY) minY = pts.y[i]; if (pts.y[i] > maxY) maxY = pts.y[i];
+          }
+          const bw = Math.max(maxX - minX, 1), bh = Math.max(maxY - minY, 1);
+          const pad = 0.06 * Math.max(bw, bh);
+          frame = { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, w: bw + 2 * pad, h: bh + 2 * pad };
+        }
+
+        const zr = new Float64Array(N), zi = new Float64Array(N);
+        for (let i = 0; i < N; i++) { zr[i] = pts.x[order[i]] - frame.cx; zi[i] = pts.y[order[i]] - frame.cy; }
+        coeffs = dft(zr, zi, N);
+
+        curveX = new Float64Array(CURVE_SAMPLES + 1);
+        curveY = new Float64Array(CURVE_SAMPLES + 1);
+        for (let i = 0; i <= CURVE_SAMPLES; i++) {
+          const [x, y] = evalAt(i / CURVE_SAMPLES);
+          curveX[i] = x; curveY[i] = y;
+        }
+
+        ready = true;
+        elapsed = 0;
+        layout();
+        if (reduceMotion) draw(1, false);
+      }
+
+      function layout() {
+        if (!frame) return;
+        const aspect = frame.w / frame.h;
+        const avail = Math.min(stage.clientWidth, 640);
+        viewW = Math.min(avail, window.innerHeight * 0.85 * aspect);
+        viewH = viewW / aspect;
+        scale = viewW / frame.w;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.style.width = viewW + 'px';
+        canvas.style.height = viewH + 'px';
+        canvas.width = Math.round(viewW * dpr);
+        canvas.height = Math.round(viewH * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function draw(u, showChain) {
+        state = { u, chain: showChain };
+        const ox = viewW / 2, oy = viewH / 2;
+        ctx.clearRect(0, 0, viewW, viewH);
+
+        if (showChain) {
+          const showRings = $('chkCircles').checked;
+          const rings = new Path2D(), arms = new Path2D();
+          let x = coeffs.dcRe, y = coeffs.dcIm;
+          const a = 2 * Math.PI * u;
+          arms.moveTo(ox + x * scale, oy + y * scale);
+          for (const c of coeffs.list) {
+            const t = a * c.k, co = Math.cos(t), si = Math.sin(t);
+            const nx = x + c.re * co - c.im * si;
+            const ny = y + c.re * si + c.im * co;
+            if (showRings && c.r * scale >= 2) {
+              rings.moveTo(ox + x * scale + c.r * scale, oy + y * scale);
+              rings.arc(ox + x * scale, oy + y * scale, c.r * scale, 0, 2 * Math.PI);
+            }
+            arms.lineTo(ox + nx * scale, oy + ny * scale);
+            x = nx; y = ny;
+          }
+          ctx.lineWidth = 0.75;
+          if (showRings) { ctx.globalAlpha = 0.6; ctx.strokeStyle = COLOUR.ring; ctx.stroke(rings); }
+          ctx.globalAlpha = 0.9; ctx.strokeStyle = COLOUR.arm; ctx.stroke(arms);
+          ctx.globalAlpha = 1;
+        }
+
+        // The trace so far, ending exactly at the tip of the chain
+        const idx = Math.floor(u * CURVE_SAMPLES);
+        ctx.beginPath();
+        ctx.moveTo(ox + curveX[0] * scale, oy + curveY[0] * scale);
+        for (let i = 1; i <= idx; i++) ctx.lineTo(ox + curveX[i] * scale, oy + curveY[i] * scale);
+        const [tx, ty] = evalAt(u);
+        ctx.lineTo(ox + tx * scale, oy + ty * scale);
+        ctx.strokeStyle = COLOUR.trace;
+        ctx.lineWidth = 1.25;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.stroke();
+      }
+
+      // ---------- Animation loop ----------
+      let last = null;
+      function tick(now) {
+        if (last === null) last = now;
+        const dt = Math.min((now - last) / 1000, 0.1); // clamp so a hidden tab does not jump ahead
+        last = now;
+        if (ready && !reduceMotion) {
+          elapsed += dt;
+          const cycle = S.duration + S.hold;
+          if (elapsed >= cycle) elapsed -= cycle;
+          if (elapsed < S.duration) draw(elapsed / S.duration, true);
+          else draw(1, false);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      // ---------- Controls ----------
+      let timer = null;
+      const schedule = () => { clearTimeout(timer); timer = setTimeout(rebuild, 120); };
+      const restart = () => { elapsed = 0; };
+
+      // [slider id, value label id, setting key, needs a rebuild?]
+      const SLIDERS = [
+        ['rngCircles', 'valCircles', 'circles', true],
+        ['rngDetail', 'valDetail', 'detail', true],
+        ['rngStroke', 'valStroke', 'minStroke', true],
+        ['rngThreshold', 'valThreshold', 'threshold', true],
+        ['rngDuration', 'valDuration', 'duration', false],
+        ['rngHold', 'valHold', 'hold', false]
+      ];
+      for (const [id, outId, key, needsRebuild] of SLIDERS) {
+        const el = $(id), out = $(outId);
+        el.value = S[key];
+        out.textContent = el.value;
+        el.addEventListener('input', () => {
+          const v = +el.value;
+          // keep the animation at the same point when the speed changes
+          if (key === 'duration' && elapsed < S.duration) elapsed = elapsed / S.duration * v;
+          S[key] = v;
+          out.textContent = el.value;
+          if (needsRebuild) schedule();
+        });
+      }
+
+      $('chkOutline').checked = S.outline;
+      $('chkOutline').addEventListener('change', e => { S.outline = e.target.checked; schedule(); });
+      $('chkCircles').addEventListener('change', () => { if (ready) draw(state.u, state.chain); });
+      $('btnRestart').addEventListener('click', restart);
+      canvas.addEventListener('click', restart);
+      window.addEventListener('resize', () => { layout(); if (ready) draw(state.u, state.chain); });
+
+      // ---------- Go ----------
+      const img = new Image();
+      img.onload = () => { src = decode(img); rebuild(); requestAnimationFrame(tick); };
+      img.onerror = () => console.error('fourier-epicycles: could not load ' + SRC);
+      img.src = SRC;
+    })();
+  </script>
+</body>
+
+</html>
