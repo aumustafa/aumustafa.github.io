@@ -41,8 +41,7 @@
       accent-color: var(--accent-color);
     }
 
-    .options { align-items: center; margin-top: 1rem; margin-bottom: 0; }
-    .sliders { margin-top: 1.25rem; margin-bottom: 0; }
+    .options { align-items: center; }
 
     .picker { display: inline-flex; align-items: center; gap: 0.5rem; }
 
@@ -111,18 +110,9 @@
         </p>
       </div>
       <p>
-        The Fourier series allows you to represent a periodic function <i>z</i>(<i>t</i>) in a basis of oscillation components cis(2&pi;<i>kt</i>), thus expressing it as <i>z</i>(<i>t</i>)&nbsp;=&nbsp;&Sigma;&nbsp;<i>c<sub>k</sub></i>&thinsp;cis(2&pi;<i>kt</i>). A cool way to represent this is to draw circles rotating at a frequency <i>k</i>, with each circle being connected to the one before, representing a sum. The tip of the last circle can trace out any closed curve (here, Charlie Brown, Snoopy, or a maple leaf), just like how the Fourier sum is equal to any periodic function.
-      </p>
-      <p>
-        Pick a figure from the menu to see its outline traced. <i>Circles</i> sets how many circles are used, and
-        <i>Duration</i> sets how long the trace takes. When the drawing finishes, the original image fades in over it.
-        Press Restart to watch it again.
+        The Fourier series allows you to represent a periodic function <i>z</i>(<i>t</i>) in a basis of oscillation components cis(2<i>&pi;kt</i>), thus expressing it as <i>z</i>(<i>t</i>)&nbsp;=&nbsp;&Sigma;&nbsp;<i>c<sub>k</sub></i>&thinsp;cis(2<i>&pi;kt</i>). A cool way to represent this is to draw circles rotating at a frequency <i>k</i>, with each circle being connected to the one before, representing a sum. The tip of the last circle can trace out any closed curve, just like how the Fourier sum is equal to any periodic function.
       </p>
     </section>
-
-    <div class="stage" id="stage">
-      <canvas id="trace" role="img" aria-label="A figure drawn by a chain of rotating circles"></canvas>
-    </div>
 
     <section class="controls options">
       <label class="picker" for="selImage">Figure:
@@ -145,6 +135,10 @@
         <input type="range" id="rngDuration" min="5" max="90" step="1" />
       </div>
     </section>
+
+    <div class="stage" id="stage">
+      <canvas id="trace" role="img" aria-label="A figure drawn by a chain of rotating circles"></canvas>
+    </div>
 
     <p class="disclaimer">
       The drawing script has been created by AI, but I have written and confirmed the explanatory text.
