@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MRI Pulse Sequences</title>
+
+  <link rel="icon" href="../favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../styles.css" />
+
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 1.25rem 2rem; justify-content: center; align-items: flex-end; margin-bottom: 1.25rem; }
+    .control { text-align: center; }
+    .control label { display: block; margin-bottom: 0.3rem; }
+    .options { align-items: center; margin-top: 1rem; margin-bottom: 0; }
+    select, input[type="range"] { font-family: var(--body-font); font-size: inherit; color: var(--text-color); accent-color: var(--accent-color); }
+    select { background: var(--code-bg); border: 1px solid var(--border-color); border-radius: 2px; padding: 0.25rem 0.5rem; min-width: 4.5rem; }
+    select:disabled { opacity: 0.5; }
+    input[type="range"] { width: 11rem; }
+    .btn { font-family: var(--body-font); font-size: inherit; color: var(--accent-color); background: none; border: 1px solid var(--border-color); border-radius: 2px; padding: 0.2rem 0.7rem; cursor: pointer; }
+    .btn:hover { color: var(--accent-deep); }
+    canvas { display: block; width: 100%; margin: 0 auto; }
+    #seq { max-width: 700px; }
+    #ksp { max-width: 520px; margin-top: 1.5rem; }
+    .figure-title { text-align: center; margin-bottom: 0.4rem; }
+    .caption { text-align: center; color: var(--muted-color); margin-top: 0.75rem; }
+    @media (max-width: 700px) {
+      .controls:not(.options) { flex-direction: column; align-items: center; gap: 0.75rem; }
+      .controls:not(.options) .control { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 0.75rem; width: min(100%, 20rem); text-align: left; }
+      .controls:not(.options) .control label { margin-bottom: 0; }
+      .controls:not(.options) select, .controls:not(.options) input[type="range"] { width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <p style="margin-bottom: 0.5rem;"><a href="../">&larr; Back to Home</a></p>
+      <h1>MRI Pulse Sequences</h1>
+    </header>
+
+    <section class="bio">
+      <p>
+        Fill in explanatory text later.
+      </p>
+    </section>
+
+    <section class="controls">
+      <div class="control">
+        <label for="selS">Sequence</label>
+        <select id="selS">
+          <option value="se">Spin echo</option>
+          <option value="gre">Gradient echo</option>
+          <option value="fse">Fast / turbo spin echo</option>
+          <option value="epi">Echo planar imaging</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="selN">Matrix</label>
+        <select id="selN"><option value="16">16</option><option value="32" selected>32</option><option value="64">64</option></select>
+      </div>
+      <div class="control">
+        <label for="selE">Echo train length</label>
+        <select id="selE"><option value="4">4</option><option value="8" selected>8</option><option value="16">16</option></select>
+      </div>
+      <div class="control">
+        <label for="rngDur">Duration: <span id="valDur"></span>&thinsp;s</label>
+        <input type="range" id="rngDur" min="5" max="90" step="1" />
+      </div>
+    </section>
+
+    <div class="figure-title" id="figTitle"></div>
+    <canvas id="seq"></canvas>
+    <canvas id="ksp"></canvas>
+    <p class="caption" id="caption"></p>
+
+    <section class="controls options">
+      <button class="btn" id="btnPlay">Pause</button>
+      <button class="btn" id="btnRestart">Restart</button>
+    </section>
+
+    <p class="disclaimer">
+      The simulation script was created by AI. I have not verified the output yet.
+    </p>
+  </main>
+
+  <script>
+  (() => {
+    const $ = id => document.getElementById(id);
+    const COL = { RF: '#4477AA', S: '#EE6677', P: '#228833', R: '#AA3377', ADC: '#66CCEE' };
+    const CM = ["#ffffff", "#fff7bc", "#fee390", "#fec44f", "#fb9929", "#eb6f14", "#cb4b02", "#983404", "#662506"]
+      .map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
+    function cmap(t) {
+      const s = Math.min(Math.max(t, 0), 1) * (CM.length - 1), i = Math.min(Math.floor(s), CM.length - 2), f = s - i;
+      return CM[i].map((c, k) => c + (CM[i + 1][k] - c) * f);
+    }
+    const SEQS = {
+      se:  { name: 'Spin echo', dur: 40, T2: 80 },
+      gre: { name: 'Gradient echo', dur: 30, T2: 40 },
+      fse: { name: 'Fast (turbo) spin echo', dur: 20, T2: 80 },
+      epi: { name: 'Echo planar imaging', dur: 12, T2: 60 }
+    };
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const selS = $('selS'), selN = $('selN'), selE = $('selE'), rngDur = $('rngDur');
+    const cv1 = $('seq'), cv2 = $('ksp'), c1 = cv1.getContext('2d'), c2 = cv2.getContext('2d');
+    const off = document.createElement('canvas');
+    const PE_AREA = 1.4; // area of a full-amplitude phase-encode lobe (flat 1.0 + ramp 0.4)
+
+    let N = 32, seq = 'se', ETL = 8, dur = 40, nShots = 32;
+    let shot, sIdx = 0, tc = 0, ptr = 0, playing = true, img, fl, raw, rawMax, last = null;
+
+    // ---------- Phantom k-space (sum of boxes: sinc * sinc * phase) ----------
+    const BOXES = [[0, 0, .7, .85, 1], [-.12, .12, .22, .26, -.55], [.17, -.17, .16, .16, .8], [.1, .25, .08, .08, .6]];
+    const sinc = x => Math.abs(x) < 1e-9 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x);
+    function computeRaw() {
+      raw = new Float32Array(N * N); rawMax = 0;
+      for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+        const u = c - N / 2, v = r - N / 2; let re = 0, im = 0;
+        for (const [x, y, w, h, a] of BOXES) {
+          const m = a * w * h * sinc(w * u) * sinc(h * v), ph = -2 * Math.PI * (u * x + v * y);
+          re += m * Math.cos(ph); im += m * Math.sin(ph);
+        }
+        raw[r * N + c] = Math.hypot(re, im); rawMax = Math.max(rawMax, raw[r * N + c]);
+      }
+    }
+
+    // ---------- Sequence construction ----------
+    const lobe = (ch, t0, flat, ramp, amp, ghost) => ({ ch, t0, flat, ramp, amp, ghost });
+    const trap = (l, t) => { const u = t - l.t0, D = l.flat + 2 * l.ramp; return u < 0 || u > D ? 0 : l.amp * Math.min(1, u / l.ramp, (D - u) / l.ramp); };
+
+    function build(s) {
+      const L = [], rf = [], adc = [], f180 = [], lines = [];
+      let Tro = 5, rr = 0.4, Tend; const rs = 0.3;
+      const pe = l => (l - N / 2) / (N / 2);
+      const ss = (c, w, fl) => {
+        rf.push({ c, w, fl });
+        L.push(lobe('S', c - w / 2 - rs, w, rs, 1));
+        if (fl < 180) L.push(lobe('S', c + w / 2 + rs, (w - rs) / 2, rs, -1)); else f180.push(c);
+      };
+      const ro = (t0, a) => { L.push(lobe('R', t0, Tro, rr, a)); adc.push([t0 + rr, t0 + rr + Tro]); };
+      const deph = (t0, a) => L.push(lobe('R', t0, (Tro - rr) / 2, rr, a));
+      const pl = (t0, a) => L.push(lobe('P', t0, 1, 0.4, a, true));
+
+      if (seq === 'se') {
+        lines.push(s); ss(2, 2, 90); deph(5.2, 1); pl(5.2, -pe(s)); ss(16, 2.4, 180); ro(27.1, 1); Tend = 36;
+      } else if (seq === 'gre') {
+        lines.push(s); ss(1.4, 1.6, 30); deph(3.9, -1); pl(3.9, pe(s)); ro(7.2, 1); pl(13.2, -pe(s)); Tend = 16.5;
+      } else if (seq === 'fse') {
+        const sh = N / ETL; ss(2, 2, 90); deph(5.2, 1);
+        for (let i = 0; i < ETL; i++) {
+          const c = 9 + 14 * i, l = i * sh + s; lines.push(l);
+          ss(c, 2.4, 180); pl(c + 1.8, pe(l)); ro(c + 4.1, 1); pl(c + 10.2, -pe(l));
+        }
+        Tend = 9 + 14 * (ETL - 1) + 12.5;
+      } else {
+        Tro = 1.6; rr = 0.25;
+        const X = (N / 2) * (Tro + rr) + rr + Tro / 2, c = 4.6 + X, s0 = c + 2.6;
+        ss(2, 2, 90); deph(5.2, 1); pl(5.2, 1); ss(c, 2.4, 180);
+        for (let j = 0; j < N; j++) {
+          const t0 = s0 + j * (Tro + rr); lines.push(j);
+          ro(t0, j % 2 ? -1 : 1);
+          if (j < N - 1) L.push(lobe('P', t0 + Tro + rr, 0, rr, PE_AREA / (N / 2) / rr));
+        }
+        Tend = s0 + N * (Tro + rr) + 2;
+      }
+
+      // k-space by integrating gradients; k flips sign at each 180 pulse
+      const NS = 10000, dt = Tend / NS, kxi = new Float32Array(NS + 1), kyi = new Float32Array(NS + 1);
+      let ax = 0, ay = 0, fi = 0;
+      for (let i = 0; i <= NS; i++) {
+        const t = i * dt;
+        while (fi < f180.length && f180[fi] <= t) { ax = -ax; ay = -ay; fi++; }
+        kxi[i] = ax / Tro * N; kyi[i] = ay / PE_AREA * (N / 2);
+        const tm = t + dt / 2;
+        for (const l of L) { if (l.ch === 'R') ax += trap(l, tm) * dt; else if (l.ch === 'P') ay += trap(l, tm) * dt; }
+      }
+      const smp = [];
+      for (const [a, b] of adc) for (let j = 0; j < N; j++) {
+        const t = a + (j + 0.5) / N * (b - a), i = Math.round(t / dt);
+        smp.push({ t, col: Math.floor(kxi[i] + N / 2), row: Math.round(kyi[i] + N / 2) });
+      }
+      // waveform cache for drawing
+      const M = 2000, wf = { RF: new Float32Array(M), S: new Float32Array(M), P: new Float32Array(M), R: new Float32Array(M) };
+      for (let m = 0; m < M; m++) {
+        const t = m / (M - 1) * Tend;
+        for (const l of L) wf[l.ch][m] += trap(l, t);
+        for (const p of rf) {
+          const d = t - p.c;
+          if (Math.abs(d) <= p.w / 2) wf.RF[m] += p.fl / 180 * sinc(d / (p.w / 4)) * (0.54 + 0.46 * Math.cos(Math.PI * d / (p.w / 2)));
+        }
+      }
+      return { T: Tend, L, adc, wf, M, kxi, kyi, NS, smp, lines, t90: rf[0].c };
+    }
+
+    // ---------- State ----------
+    function fill(p) {
+      if (p.row < 0 || p.row >= N || p.col < 0 || p.col >= N) return;
+      const k = p.row * N + p.col;
+      img[k] = raw[k] * Math.exp(-(p.t - shot.t90) / SEQS[seq].T2); fl[k] = 1;
+    }
+    function reset() {
+      N = +selN.value; ETL = Math.min(+selE.value, N); seq = selS.value;
+      nShots = seq === 'fse' ? N / ETL : seq === 'epi' ? 1 : N;
+      selE.disabled = seq !== 'fse';
+      img = new Float32Array(N * N); fl = new Uint8Array(N * N);
+      off.width = off.height = N; computeRaw();
+      sIdx = 0; shot = build(0); tc = 0; ptr = 0; playing = true; $('btnPlay').textContent = 'Pause';
+      if (reduce) {
+        for (let s = 0; s < nShots; s++) { shot = build(s); shot.smp.forEach(fill); }
+        tc = shot.T; playing = false; $('btnPlay').textContent = 'Play';
+      }
+      draw();
+    }
+    function advance(dt) {
+      if (!playing) return;
+      tc += dt / (dur / nShots) * shot.T;
+      while (ptr < shot.smp.length && shot.smp[ptr].t <= tc) fill(shot.smp[ptr++]);
+      if (tc >= shot.T) {
+        while (ptr < shot.smp.length) fill(shot.smp[ptr++]);
+        if (++sIdx >= nShots) { sIdx = nShots - 1; tc = shot.T; playing = false; $('btnPlay').textContent = 'Play'; }
+        else { shot = build(sIdx); tc = 0; ptr = 0; }
+      }
+    }
+
+    // ---------- Drawing helpers ----------
+    function setup(cv, ctx, W, H) {
+      const dpr = window.devicePixelRatio || 1;
+      cv.style.height = H + 'px'; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    }
+    function niceStep(span) {
+      const raw = span / 6, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+      const mant = f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10;
+      return { step: mant * p, minor: mant * p / (mant === 2 ? 4 : 5) };
+    }
+    function label(ctx, v, sub, cx, cy, rot, f, align) {
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot); ctx.textBaseline = 'middle';
+      const it = `italic ${f.fs}px ${f.font}`, sm = `${(f.fs * 0.7).toFixed(1)}px ${f.font}`;
+      ctx.font = it; const w1 = ctx.measureText(v).width; ctx.font = sm; const w2 = sub ? ctx.measureText(sub).width : 0;
+      let x0 = align === 'right' ? -(w1 + w2) : -(w1 + w2) / 2; ctx.textAlign = 'left'; ctx.fillStyle = f.txt;
+      ctx.font = it; ctx.fillText(v, x0, 0);
+      if (sub) { ctx.font = sm; ctx.fillText(sub, x0 + w1, f.fs * 0.25); }
+      ctx.restore();
+    }
+    const fontInfo = () => { const cs = getComputedStyle(document.body); return { font: cs.fontFamily, txt: cs.color, fs: parseFloat(cs.fontSize) }; };
+
+    // ---------- Sequence diagram ----------
+    function drawSeq() {
+      const f = fontInfo(), fs = f.fs, W = cv1.clientWidth, rh = 50, top = 8, H = top + 5 * rh + 44;
+      setup(cv1, c1, W, H);
+      const ml = 62, mr = 12, pw = W - ml - mr, T = shot.T, X = t => ml + t / T * pw;
+      const rows = [['RF', null, 'RF'], ['G', 'S', 'S'], ['G', 'P', 'P'], ['G', 'R', 'R'], ['Acq', null, 'Acq']];
+      const yc = k => top + rh * (k + 0.5), amp = rh * 0.4;
+      c1.lineWidth = 0.5;
+      rows.forEach(([a, b], k) => {
+        c1.strokeStyle = '#c0c0c0'; c1.beginPath(); c1.moveTo(ml, yc(k)); c1.lineTo(ml + pw, yc(k)); c1.stroke();
+        label(c1, a, b, ml - 10, yc(k), 0, f, 'right');
+        if (a !== 'G') { c1.save(); c1.font = `${fs}px ${f.font}`; c1.fillStyle = f.txt; c1.textAlign = 'right'; c1.textBaseline = 'middle'; c1.restore(); }
+      });
+      const wave = (key, k) => {
+        const arr = shot.wf[key]; c1.beginPath();
+        for (let m = 0; m < shot.M; m++) { const x = ml + m / (shot.M - 1) * pw, y = yc(k) - arr[m] * amp; m ? c1.lineTo(x, y) : c1.moveTo(x, y); }
+        c1.stroke();
+      };
+      const pass = (a, ghost) => {
+        c1.globalAlpha = a; c1.lineWidth = 1.2; c1.lineJoin = 'round';
+        [['RF', 0], ['S', 1], ['P', 2], ['R', 3]].forEach(([key, k]) => { c1.strokeStyle = COL[key]; wave(key, k); });
+        c1.fillStyle = COL.ADC; c1.strokeStyle = COL.ADC;
+        for (const [t0, t1] of shot.adc) { c1.globalAlpha = a * 0.7; c1.fillRect(X(t0), yc(4) - 9, Math.max(1, X(t1) - X(t0)), 18); }
+        if (ghost) {
+          c1.globalAlpha = 0.18; c1.lineWidth = 0.6; c1.strokeStyle = COL.P;
+          for (const l of shot.L) if (l.ghost) for (let q = -4; q <= 4; q++) {
+            const g = q / 4 * (l.amp < 0 ? -1 : 1) * Math.abs(l.amp < 0 ? 1 : 1);
+            c1.beginPath(); c1.moveTo(X(l.t0), yc(2)); c1.lineTo(X(l.t0 + l.ramp), yc(2) - g * amp);
+            c1.lineTo(X(l.t0 + l.ramp + l.flat), yc(2) - g * amp); c1.lineTo(X(l.t0 + l.flat + 2 * l.ramp), yc(2)); c1.stroke();
+          }
+        }
+      };
+      pass(0.3, true);
+      c1.save(); c1.beginPath(); c1.rect(ml - 1, 0, X(tc) - ml + 1, H); c1.clip(); pass(1, false); c1.restore();
+      c1.globalAlpha = 1;
+      // cursor
+      c1.strokeStyle = '#000'; c1.lineWidth = 0.6; c1.setLineDash([3, 3]);
+      c1.beginPath(); c1.moveTo(X(tc), top); c1.lineTo(X(tc), top + 5 * rh); c1.stroke(); c1.setLineDash([]);
+      // time axis (ticks point inward)
+      const yb = top + 5 * rh + 4, { step, minor } = niceStep(T);
+      c1.strokeStyle = '#000'; c1.lineWidth = 0.5; c1.beginPath(); c1.moveTo(ml, yb); c1.lineTo(ml + pw, yb); c1.stroke();
+      const tk = (sz, st, lab) => {
+        c1.strokeStyle = '#808080'; c1.lineWidth = lab ? 0.5 : 0.4;
+        for (let k = 0; k * st <= T + 1e-9; k++) {
+          c1.beginPath(); c1.moveTo(X(k * st), yb); c1.lineTo(X(k * st), yb - sz); c1.stroke();
+          if (lab) { c1.fillStyle = f.txt; c1.font = `${fs}px ${f.font}`; c1.textAlign = 'center'; c1.textBaseline = 'top'; c1.fillText(+(k * st).toFixed(4), X(k * st), yb + fs * 0.45); }
+        }
+      };
+      tk(fs * 0.25, minor, false); tk(fs * 0.4375, step, true);
+      c1.fillStyle = f.txt; c1.font = `${fs}px ${f.font}`; c1.textAlign = 'center'; c1.textBaseline = 'middle';
+      // label(c1, 't', ' (ms)', ml + pw / 2 - 8, H - 10, 0, f);
+    }
+
+    // ---------- k-space ----------
+    function drawK() {
+      const f = fontInfo(), fs = f.fs, W = cv2.clientWidth;
+      const tMaj = fs * 0.4375, tMin = fs * 0.25, pad = fs * 0.4375, wMaj = fs * 0.0625, wMin = fs * 0.05;
+      const ml = 62, mr = 12, mt = 10, mb = 52, S = W - ml - mr, H = S + mt + mb;
+      setup(cv2, c2, W, H);
+      const oc = off.getContext('2d'), id = oc.createImageData(N, N), d = id.data;
+      for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+        const k = r * N + c, o = 4 * ((N - 1 - r) * N + c);
+        const col = fl[k] ? cmap(Math.log(1 + 1000 * img[k] / rawMax) / Math.log(1001)) : [255, 255, 255];
+        d[o] = col[0]; d[o + 1] = col[1]; d[o + 2] = col[2]; d[o + 3] = 255;
+      }
+      oc.putImageData(id, 0, 0);
+      c2.imageSmoothingEnabled = false; c2.drawImage(off, ml, mt, S, S);
+      const px = k => ml + (k + N / 2) / N * S, py = k => mt + (1 - (k + N / 2) / N) * S;
+      // trajectory so far
+      c2.save(); c2.beginPath(); c2.rect(ml, mt, S, S); c2.clip();
+      const idx = Math.min(shot.NS, Math.round(tc / shot.T * shot.NS)), st = Math.max(1, Math.floor(shot.NS / 3000));
+      c2.beginPath(); c2.moveTo(px(shot.kxi[0]), py(shot.kyi[0]));
+      for (let i = st; i <= idx; i += st) c2.lineTo(px(shot.kxi[i]), py(shot.kyi[i]));
+      c2.lineTo(px(shot.kxi[idx]), py(shot.kyi[idx]));
+      c2.strokeStyle = '#004488'; c2.globalAlpha = 0.75; c2.lineWidth = 1; c2.stroke(); c2.globalAlpha = 1;
+      if (playing) { c2.fillStyle = '#EE6677'; c2.beginPath(); c2.arc(px(shot.kxi[idx]), py(shot.kyi[idx]), 3, 0, 2 * Math.PI); c2.fill(); }
+      c2.restore();
+      // ticks, frame, labels
+      const { step, minor } = niceStep(N);
+      const ticks = (size, w, ss, lab) => {
+        c2.lineWidth = w; c2.strokeStyle = '#808080';
+        for (let k = Math.ceil(-N / 2 / ss - 1e-9); k * ss <= N / 2 + 1e-9; k++) {
+          const v = k * ss, a = px(v), b = py(v);
+          c2.beginPath();
+          c2.moveTo(a, mt + S); c2.lineTo(a, mt + S - size); c2.moveTo(a, mt); c2.lineTo(a, mt + size);
+          c2.moveTo(ml, b); c2.lineTo(ml + size, b); c2.moveTo(ml + S, b); c2.lineTo(ml + S - size, b); c2.stroke();
+          if (lab) {
+            const s = (Math.abs(v) < 1e-9 ? 0 : +v.toFixed(6)).toString().replace('-', '\u2212');
+            c2.fillStyle = f.txt; c2.font = `${fs}px ${f.font}`;
+            c2.textAlign = 'center'; c2.textBaseline = 'top'; c2.fillText(s, a, mt + S + pad);
+            c2.textAlign = 'right'; c2.textBaseline = 'middle'; c2.fillText(s, ml - pad, b);
+          }
+        }
+      };
+      ticks(tMin, wMin, minor, false); ticks(tMaj, wMaj, step, true);
+      c2.strokeStyle = '#000'; c2.lineWidth = wMaj; c2.strokeRect(ml, mt, S, S);
+      label(c2, 'k', 'x', ml + S / 2, H - 12, 0, f);
+      label(c2, 'k', 'y', 14, mt + S / 2, -Math.PI / 2, f);
+    }
+
+    function draw() {
+      drawSeq(); drawK();
+      const L = shot.lines, ln = L.length === 1 ? `phase-encode line ${L[0]}` : `${L.length} lines per shot`;
+      $('caption').innerHTML = `${SEQS[seq].name}; repetition ${sIdx + 1} of ${nShots}; ${ln}`;
+    }
+
+    // ---------- Events ----------
+    function tick(now) {
+      if (last === null) last = now;
+      const dt = Math.min((now - last) / 1000, 0.1); last = now;
+      if (playing && !reduce) { advance(dt); draw(); }
+      requestAnimationFrame(tick);
+    }
+    selS.addEventListener('change', () => { dur = SEQS[selS.value].dur; rngDur.value = dur; $('valDur').textContent = dur; reset(); });
+    selN.addEventListener('change', reset);
+    selE.addEventListener('change', reset);
+    rngDur.addEventListener('input', () => { dur = +rngDur.value; $('valDur').textContent = dur; });
+    $('btnRestart').addEventListener('click', reset);
+    $('btnPlay').addEventListener('click', () => {
+      if (sIdx >= nShots - 1 && tc >= shot.T) { reset(); return; }
+      playing = !playing; last = null; $('btnPlay').textContent = playing ? 'Pause' : 'Play'; draw();
+    });
+    window.addEventListener('resize', draw);
+
+    dur = SEQS.se.dur; rngDur.value = dur; $('valDur').textContent = dur;
+    reset();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+    requestAnimationFrame(tick);
+  })();
+  </script>
+</body>
+
+</html>
