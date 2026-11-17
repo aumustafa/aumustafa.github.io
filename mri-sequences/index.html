@@ -90,7 +90,7 @@
   <script>
   (() => {
     const $ = id => document.getElementById(id);
-    const COL = { RF: '#4477AA', S: '#EE6677', P: '#228833', R: '#AA3377', ADC: '#66CCEE' };
+    const COL = { RF: '#2a2420', S: '#E60033', P: '#00873D', R: '#004488', ADC: '#6b6258' };
     const CM = ["#ffffff", "#fff7bc", "#fee390", "#fec44f", "#fb9929", "#eb6f14", "#cb4b02", "#983404", "#662506"]
       .map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
     function cmap(t) {
@@ -236,13 +236,13 @@
       const mant = f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10;
       return { step: mant * p, minor: mant * p / (mant === 2 ? 4 : 5) };
     }
-    function label(ctx, v, sub, cx, cy, rot, f, align) {
+    function label(ctx, v, sub, cx, cy, rot, f, align, upright, subPlain) {
       ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot); ctx.textBaseline = 'middle';
-      const it = `italic ${f.fs}px ${f.font}`, sm = `${(f.fs * 0.7).toFixed(1)}px ${f.font}`;
+      const it = `${upright ? '' : 'italic '}${f.fs}px ${f.font}`, sm = subPlain ? `${f.fs}px ${f.font}` : `${(f.fs * 0.7).toFixed(1)}px ${f.font}`;
       ctx.font = it; const w1 = ctx.measureText(v).width; ctx.font = sm; const w2 = sub ? ctx.measureText(sub).width : 0;
       let x0 = align === 'right' ? -(w1 + w2) : -(w1 + w2) / 2; ctx.textAlign = 'left'; ctx.fillStyle = f.txt;
       ctx.font = it; ctx.fillText(v, x0, 0);
-      if (sub) { ctx.font = sm; ctx.fillText(sub, x0 + w1, f.fs * 0.25); }
+      if (sub) { ctx.font = sm; ctx.fillText(sub, x0 + w1, subPlain ? 0 : f.fs * 0.25); }
       ctx.restore();
     }
     const fontInfo = () => { const cs = getComputedStyle(document.body); return { font: cs.fontFamily, txt: cs.color, fs: parseFloat(cs.fontSize) }; };
@@ -257,7 +257,7 @@
       c1.lineWidth = 0.5;
       rows.forEach(([a, b], k) => {
         c1.strokeStyle = '#c0c0c0'; c1.beginPath(); c1.moveTo(ml, yc(k)); c1.lineTo(ml + pw, yc(k)); c1.stroke();
-        label(c1, a, b, ml - 10, yc(k), 0, f, 'right');
+        label(c1, a, b, ml - 10, yc(k), 0, f, 'right', a !== 'G');
         if (a !== 'G') { c1.save(); c1.font = `${fs}px ${f.font}`; c1.fillStyle = f.txt; c1.textAlign = 'right'; c1.textBaseline = 'middle'; c1.restore(); }
       });
       const wave = (key, k) => {
@@ -297,7 +297,7 @@
       };
       tk(fs * 0.25, minor, false); tk(fs * 0.4375, step, true);
       c1.fillStyle = f.txt; c1.font = `${fs}px ${f.font}`; c1.textAlign = 'center'; c1.textBaseline = 'middle';
-      // label(c1, 't', ' (ms)', ml + pw / 2 - 8, H - 10, 0, f);
+      label(c1, 't', ' (ms)', ml + pw / 2, H - 10, 0, f, 'center', false, true);
     }
 
     // ---------- k-space ----------
@@ -321,7 +321,7 @@
       c2.beginPath(); c2.moveTo(px(shot.kxi[0]), py(shot.kyi[0]));
       for (let i = st; i <= idx; i += st) c2.lineTo(px(shot.kxi[i]), py(shot.kyi[i]));
       c2.lineTo(px(shot.kxi[idx]), py(shot.kyi[idx]));
-      c2.strokeStyle = '#004488'; c2.globalAlpha = 0.75; c2.lineWidth = 1; c2.stroke(); c2.globalAlpha = 1;
+      c2.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#004488'; c2.globalAlpha = 0.75; c2.lineWidth = 1; c2.stroke(); c2.globalAlpha = 1;
       if (playing) { c2.fillStyle = '#EE6677'; c2.beginPath(); c2.arc(px(shot.kxi[idx]), py(shot.kyi[idx]), 3, 0, 2 * Math.PI); c2.fill(); }
       c2.restore();
       // ticks, frame, labels
@@ -343,8 +343,8 @@
       };
       ticks(tMin, wMin, minor, false); ticks(tMaj, wMaj, step, true);
       c2.strokeStyle = '#000'; c2.lineWidth = wMaj; c2.strokeRect(ml, mt, S, S);
-      label(c2, 'k', 'x', ml + S / 2, H - 12, 0, f);
-      label(c2, 'k', 'y', 14, mt + S / 2, -Math.PI / 2, f);
+      label(c2, 'k', 'R', ml + S / 2, H - 12, 0, f);
+      label(c2, 'k', 'P', 14, mt + S / 2, -Math.PI / 2, f);
     }
 
     function draw() {
